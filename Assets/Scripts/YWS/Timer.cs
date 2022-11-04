@@ -9,9 +9,9 @@ public class Timer : MonoBehaviour
     private float elapsedTime = 0.0f;
     private Color initialSkyTint = new Color(128/255f, 128/255f, 128/255f);
     [Header("制限時間")] private float timeLimit = 300f;
-    [SerializeField] private AnimationCurve Curve_R = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(120f, 253/255f), new Keyframe(240f, 46/255f));
-    [SerializeField] private AnimationCurve Curve_G = new AnimationCurve(new Keyframe(0f, 103/255f), new Keyframe(120f, 126/255f), new Keyframe(240f, 75/255f));
-    [SerializeField] private AnimationCurve Curve_B = new AnimationCurve(new Keyframe(0f, 192/255f), new Keyframe(120f, 0f), new Keyframe(240f, 113/255f));
+    [SerializeField] private AnimationCurve Curve_R = new AnimationCurve(new Keyframe(0f, 179/255f), new Keyframe(120f, 1f), new Keyframe(240f, 0f));
+    [SerializeField] private AnimationCurve Curve_G = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(120f, 169/255f), new Keyframe(240f, 17/255f));
+    [SerializeField] private AnimationCurve Curve_B = new AnimationCurve(new Keyframe(0f, 254/255f), new Keyframe(120f, 67/255f), new Keyframe(240f, 142/255f));
     [SerializeField] private Text display = null;
 
     // Start is called before the first frame update
@@ -33,13 +33,13 @@ public class Timer : MonoBehaviour
             if (phase != 1 && elapsedTime >= 120f && elapsedTime <= 240f)
             {
                 phase = 1;
-                RenderSettings.skybox.SetColor("_SkyTint", new Color (253/255f, 126/255f, 0f));
+                //RenderSettings.skybox.SetColor("_SkyTint", new Color (253/255f, 126/255f, 0f));
                 Debug.Log("Phase 0 to Phase 1");
             }
             else if (phase != 2 && elapsedTime >= 240f)
             {
                 phase = 2;
-                RenderSettings.skybox.SetColor("_SkyTint", new Color(46/255f, 75/255f, 113/255f));
+                //RenderSettings.skybox.SetColor("_SkyTint", new Color(46/255f, 75/255f, 113/255f));
                 Debug.Log("Phase 1 to Phase 2");
             }
 
