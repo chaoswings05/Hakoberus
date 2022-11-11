@@ -17,6 +17,7 @@ public class Goal : MonoBehaviour
         //もしゴールオブジェクトのコライダーに接触した時の処理。
         if (other.name == BlueHakoberos.name)
         {
+            Debug.Log("Goal");
            
                 //キャラクターを非表示にする処理
                 BlueHakoberos.SetActive(false);
