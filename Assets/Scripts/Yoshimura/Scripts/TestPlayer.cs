@@ -7,7 +7,7 @@ public class TestPlayer : MonoBehaviour
 
     //テストなので、後で消します
 
-    public float speed = 1f;
+    public float speed = 0.1f;
 
     // Start is called before the first frame update
     void Start()
