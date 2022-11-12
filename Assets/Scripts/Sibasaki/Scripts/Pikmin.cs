@@ -5,38 +5,54 @@ using UnityEngine.AI;
 
 public class Pikmin : MonoBehaviour
 {
-    [SerializeField] NavMeshAgent agent;// NavMeshAgentの取得
+    // NavMeshAgentの取得
+    [SerializeField] NavMeshAgent agent;
     
+    //Controllerスクリプトの追加
+    public Controller controller;
 
-    public Controller controller;//Controllerスクリプトの追加
-    public ObjectController targetObject;//ObjectControllerスクリプトの取得
-    public Transform homePos;//ピクミンのカエル家の座標の取得
-    public Transform PlayerGathPos;//PlayerGathPosの位置情報の取得
-    public Transform pileUpPos;//ピクミンを積み上げる場所の取得
-    public ActionPoint actionPoint;//ActionPointスクリプトの取得
-    public PileUpPoint pileUpPoint;//PileUpPointスクリプトの取得
-
-    public BoneController Bone;//BoneControllerスクリプトの取得
+    //ObjectControllerスクリプトの取得
+    public ObjectController targetObject;
     
-    public Transform BoneDestroyPos;//骨を持って行く場所
+    //ピクミンのカエル家の座標の取得
+    public Transform homePos;
     
-    public bool goHome;//ピクミンが家に帰るかどうか
-
-    public  bool follow;//Playerに追従するかどうか
-
-    public bool BoneDestroy;//持っている骨を壊すかどうか
+    //PlayerGathPosの位置情報の取得
+    public Transform PlayerGathPos;
     
+    //ピクミンを積み上げる場所の取得
+    public Transform pileUpPos;
+    
+    //ActionPointスクリプトの取得
+    public ActionPoint actionPoint;
+    
+    //PileUpPointスクリプトの取得
+    public PileUpPoint pileUpPoint;
+    
+    //BoneControllerスクリプトの取得
+    public BoneController Bone;
+    
+    //骨を持って行く場所
+    public Transform BoneDestroyPos;
+    
+    //ピクミンが家に帰るかどうか
+    public bool goHome;
 
-
+    //Playerに追従するかどうか
+    public  bool follow;
+    //持っている骨を壊すかどうか
+    public bool BoneDestroy;
+    
 
     private void Update()
     {
-        if (follow)//もしPlayerに追従するなら
+        //もしPlayerに追従するなら
+        if (follow)
         {
             agent.SetDestination(PlayerGathPos.position);//目的地をPlayerGathPosにする
         }
-
-        if (goHome)//もし家に帰るなら
+        //もし家に帰るなら
+        if (goHome)
         {
             agent.SetDestination(homePos.transform.position);//目的地をhomePosにする
             if(Vector3.Distance(transform.position, homePos.transform.position) <= 0.85f)//もしhomePosとの距離が0.85未満になったら
@@ -48,8 +64,8 @@ public class Pikmin : MonoBehaviour
             }
             return;
         }
-
-        if(BoneDestroy)//骨を消す場所に行く時
+        //骨を消す場所に行く時
+        if(BoneDestroy)
         {
             agent.SetDestination(BoneDestroyPos.transform.position);//骨を消す場所に行く
             
@@ -61,8 +77,8 @@ public class Pikmin : MonoBehaviour
             return;
         }
 
-
-        if(Bone != null)//もしBoneになにか入っている場合
+        //もしBoneになにか入っている場合
+        if(Bone != null)
         {
             //agent.stoppingDistance = 0;
             agent.SetDestination(Bone.transform.position);//目的地をBoneにする
@@ -74,8 +90,8 @@ public class Pikmin : MonoBehaviour
                 BoneDestroy = true;//家に向かう
             }
         }
-
-        if(pileUpPoint != null)//もし積み上げるなら(ピクミンはHomePosには戻らない)
+        //もし積み上げるなら(ピクミンはHomePosには戻らない)
+        if(pileUpPoint != null)
         {
             agent.SetDestination(pileUpPos.position);//ピクミンの目的地を積み上げる場所にする
             if(Vector3.Distance(transform.position, pileUpPos.transform.position) <= 0.2f)//もしピクミンがくっついたら
@@ -85,8 +101,8 @@ public class Pikmin : MonoBehaviour
             }
             
         }
-
-        if(targetObject != null)//もしtargetObjectになにか入っている場合
+        //もしtargetObjectになにか入っている場合
+        if(targetObject != null)
         {
             agent.stoppingDistance = 0;
             agent.SetDestination(targetObject.transform.position);//目的地をtargetObjectにする
