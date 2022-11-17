@@ -12,7 +12,7 @@ public class Timer : MonoBehaviour
     [SerializeField] private AnimationCurve Curve_R = new AnimationCurve(new Keyframe(0f, 179/255f), new Keyframe(120f, 1f), new Keyframe(240f, 0f));
     [SerializeField] private AnimationCurve Curve_G = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(120f, 169/255f), new Keyframe(240f, 17/255f));
     [SerializeField] private AnimationCurve Curve_B = new AnimationCurve(new Keyframe(0f, 254/255f), new Keyframe(120f, 67/255f), new Keyframe(240f, 142/255f));
-    [SerializeField] private Text display = null;
+    //[SerializeField] private Text display = null;
 
     // Start is called before the first frame update
     void Start()
@@ -51,6 +51,6 @@ public class Timer : MonoBehaviour
             Debug.Log("Game End");
         }
 
-        display.text = elapsedTime.ToString();
+        //display.text = elapsedTime.ToString();
     }
 }
