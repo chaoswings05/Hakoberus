@@ -53,15 +53,6 @@ public class PlayerTestScript : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
         }
-
-        Vector3 diff = transform.position - player_Pos;
-
-        if(diff.magnitude > 0.01f)
-        {
-            transform.rotation=Quaternion.LookRotation(diff);
-        }
     }
-
-    
 }
 

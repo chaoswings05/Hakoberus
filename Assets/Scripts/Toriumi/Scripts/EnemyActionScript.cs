@@ -7,6 +7,10 @@ using UnityEngine.AI;
 
 public class EnemyActionScript : MonoBehaviour
 {
+    // memo
+    // AnimatorのTargetMatchingを使う予定(縦積み)
+
+
     // 赤ハコベロス用リスト
     [SerializeField]
     List<GameObject> enemyList = new List<GameObject>();

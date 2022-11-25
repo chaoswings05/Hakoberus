@@ -6,21 +6,19 @@ using UnityEngine.AI;
 public class EnemyFollowScript : MonoBehaviour
 {
     [SerializeField]
-    GameObject player;          // PlayerTarget
+    GameObject player;          // TargetObject
 
     [SerializeField]
-    float arrivedDis = 1.5f,    // プレイヤーに到着した距離
-
-          followDis = 1f;      // プレイヤーと離れた時に追い始める距離
+    float StopDis = 1f,         // プレイヤーに限界まで近づける距離
+          AgeSpeed = 1f;        // 赤ハコベロスの速度
 
     private NavMeshAgent age;
 
     // Start is called before the first frame update
     void Start()
     {
-        // distance = transform.position - player.transform.position;
-
         age = GetComponent<NavMeshAgent>();
+        age.speed = AgeSpeed;
     }
 
     // Update is called once per frame
@@ -31,21 +29,10 @@ public class EnemyFollowScript : MonoBehaviour
 
     private void LateUpdate()
     {
-        // transform.position = Vector3.Lerp(transform.position, player.transform.position + distance, speed * Time.deltaTime);
-
-        // playerとの距離までの設定
+        // playerまでの距離を設定
         age.SetDestination(player.transform.position);
 
-        // playerとの距離が近すぎたら止まる
-        if(age.remainingDistance < arrivedDis)
-        {
-            age.isStopped = true;
-        }
-
-        // そうでなければ動く
-        else if(age.remainingDistance > followDis)
-        {
-            age.isStopped = false;
-        }
+        // この距離まで近づいたら止まる
+        age.stoppingDistance = StopDis;
     }
 }
