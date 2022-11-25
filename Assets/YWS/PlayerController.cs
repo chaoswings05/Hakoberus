@@ -99,6 +99,7 @@ public class PlayerController : MonoBehaviour
                 {
                     Debug.Log("3秒経過");
                     StartCoroutine(EnemyHighMove());
+                    other.gameObject.GetComponent<ActionArea>().IsCostPayed = true;
                 }
             }
         }
