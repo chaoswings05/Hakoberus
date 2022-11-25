@@ -123,17 +123,20 @@ public class PlayerController : MonoBehaviour
     {
         InAction = true;
         // 簡単な表記にするために
-        //Vector3 firstPos = followingEnemy[0].transform.position;
         Vector3 h_brockPos = pileUpPos.transform.position;
 
         // エネミーの移動
-        //followingEnemy[0].GetComponent<Enemy>().follow = false;
-        //followingEnemy[1].GetComponent<Enemy>().follow = false;
-        //followingEnemy[0].transform.position = new Vector3(h_brockPos.x, h_brockPos.y, h_brockPos.z - enemyZ);
-        //followingEnemy[1].transform.position = new Vector3(firstPos.x, firstPos.y + enemyY, firstPos.z);
+
+        // enemyのスクリプトとAIコンポーネントをfalse
+        foreach (Enemy obj in followingEnemy)
+        {
+            obj.GetComponent<Enemy>().follow = false;
+            obj.GetComponent<NavMeshAgent>().enabled = false;
+        }
+
         for (int i = 0; i < actionCost; i++)
         {
-            followingEnemy[i].GetComponent<Enemy>().follow = false;
+            //followingEnemy[i].GetComponent<Enemy>().follow = false;
             followingEnemy[i].transform.position = new Vector3(h_brockPos.x, h_brockPos.y + enemyY * i, h_brockPos.z - enemyZ);
         }
         Debug.Log("アクション");
@@ -151,12 +154,11 @@ public class PlayerController : MonoBehaviour
         //yield return new WaitForSeconds(1f);
 
         // 外したコンポーネントを再度ON
-        /*foreach (GameObject obj in nav)
+        foreach (Enemy obj in followingEnemy)
         {
-            obj.GetComponent<EnemyFollowScript>().enabled = true;
+            obj.GetComponent<Enemy>().follow = true;
             obj.GetComponent<NavMeshAgent>().enabled = true;
-
-        }*/
+        }
     }
     
     [SerializeField] Camera mainCamera = null;
