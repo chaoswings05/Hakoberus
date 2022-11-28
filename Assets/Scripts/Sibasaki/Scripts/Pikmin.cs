@@ -42,7 +42,14 @@ public class Pikmin : MonoBehaviour
     public  bool follow;
     //持っている骨を壊すかどうか
     public bool BoneDestroy;
+    //範囲内にいるかどうか
+    public bool inArea = false;
     
+
+    void Start()
+    {
+       
+    }
 
     private void Update()
     {
@@ -64,55 +71,66 @@ public class Pikmin : MonoBehaviour
             }
             return;
         }
-        //骨を消す場所に行く時
-        if(BoneDestroy)
-        {
-            agent.SetDestination(BoneDestroyPos.transform.position);//骨を消す場所に行く
-            
-            if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 0.3f)//もしBoneDestroyPosの距離が0.75より小さくなったら
-            {
-                Destroy(Bone.gameObject);//骨を消す
-                Destroy(gameObject);//自分を消す
-            }
-            return;
-        }
 
-        //もしBoneになにか入っている場合
-        if(Bone != null)
-        {
-            //agent.stoppingDistance = 0;
-            agent.SetDestination(Bone.transform.position);//目的地をBoneにする
-            if (Vector3.Distance(transform.position, Bone.transform.position) <= 0.4f)//もしBoneの距離が0.75より小さくなったら
+       //アクションポイントの範囲内に入っているなら
+        //if(inArea == true)
+        //{     
+            //骨を消す場所に行く時
+            if(BoneDestroy)
             {
-                Bone.transform.position = transform.position + Vector3.forward * 0.9f;//targetObjectを上にする
-                Bone.transform.SetParent(transform);//Boneとピクミンをくっつける
-                Destroy(Bone.GetComponent<Rigidbody>());//BoneのRigidbodyをはずす
-                BoneDestroy = true;//家に向かう
-            }
-        }
-        //もし積み上げるなら(ピクミンはHomePosには戻らない)
-        if(pileUpPoint != null)
-        {
-            agent.SetDestination(pileUpPos.position);//ピクミンの目的地を積み上げる場所にする
-            if(Vector3.Distance(transform.position, pileUpPos.transform.position) <= 0.2f)//もしピクミンがくっついたら
-            {
-                agent.speed = 0f;
-                //pileUpPoint.transform.SetParent(transform);//pileUpPointとピクミンをくっつける
-            }
+                agent.SetDestination(BoneDestroyPos.transform.position);//骨を消す場所に行く
             
-        }
-        //もしtargetObjectになにか入っている場合
-        if(targetObject != null)
-        {
-            agent.stoppingDistance = 0;
-            agent.SetDestination(targetObject.transform.position);//目的地をtargetObjectにする
-            if (Vector3.Distance(transform.position, targetObject.transform.position) <= 0.75f)//もしargetObjectの距離が0.75より小さくなったら
-            {
-                targetObject.transform.position = transform.position + Vector3.forward * 0.9f;//targetObjectを上にする
-                targetObject.transform.SetParent(transform);//targetObjectとピクミンをくっつける
-                Destroy(targetObject.GetComponent<Rigidbody>());//targetObjectのRigidbodyをはずす
-                goHome = true;//家に向かう
+                if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 0.3f)//もしBoneDestroyPosの距離が0.75より小さくなったら
+                {
+                    Destroy(Bone.gameObject);//骨を消す
+                    Destroy(gameObject);//自分を消す
+                }
+                return;
             }
-        }
+
+            //もしBoneになにか入っている場合
+            if(Bone != null)
+            {
+                //agent.stoppingDistance = 0;
+                agent.SetDestination(Bone.transform.position);//目的地をBoneにする
+                if (Vector3.Distance(transform.position, Bone.transform.position) <= 0.4f)//もしBoneの距離が0.75より小さくなったら
+                {
+                    Bone.transform.position = transform.position + Vector3.forward * 0.9f;//targetObjectを上にする
+                    Bone.transform.SetParent(transform);//Boneとピクミンをくっつける
+                    Destroy(Bone.GetComponent<Rigidbody>());//BoneのRigidbodyをはずす
+                    BoneDestroy = true;//家に向かう
+                }
+            }
+            //もし積み上げるなら(ピクミンはHomePosには戻らない)
+            if(pileUpPoint != null)
+            {
+                agent.SetDestination(pileUpPos.position);//ピクミンの目的地を積み上げる場所にする
+                if(Vector3.Distance(transform.position, pileUpPos.transform.position) <= 0.2f)//もしピクミンがくっついたら
+                {
+                    agent.speed = 0f;
+                    //pileUpPoint.transform.SetParent(transform);//pileUpPointとピクミンをくっつける
+                }
+            
+            }
+            //もしtargetObjectになにか入っている場合
+            if(targetObject != null)
+            {
+                agent.stoppingDistance = 0;
+                agent.SetDestination(targetObject.transform.position);//目的地をtargetObjectにする
+                if (Vector3.Distance(transform.position, targetObject.transform.position) <= 0.75f)//もしargetObjectの距離が0.75より小さくなったら
+                {
+                    //targetObject.transform.position = transform.position + Vector3.forward * 0.9f;//targetObjectを上にする
+                    targetObject.transform.SetParent(transform);//targetObjectとピクミンをくっつける
+                    //Destroy(targetObject.GetComponent<Rigidbody>());//targetObjectのRigidbodyをはずす
+                    goHome = true;//家に向かう
+                }
+            }
+        //}
+    }
+
+    //ピクミンを破壊するスクリプト
+    public void PikminDestroy()
+    {
+        Destroy(this.gameObject);
     }
 }
