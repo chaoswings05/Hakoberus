@@ -7,10 +7,6 @@ using UnityEngine.AI;
 
 public class EnemyActionScript : MonoBehaviour
 {
-    // memo
-    // AnimatorのTargetMatchingを使う予定(縦積み)
-
-
     // 赤ハコベロス用リスト
     [SerializeField]
     List<GameObject> enemyList = new List<GameObject>();
@@ -19,21 +15,20 @@ public class EnemyActionScript : MonoBehaviour
     [SerializeField]
     GameObject[] RedEnemy;
 
-    // 縦障害のブロック
-    [SerializeField]
-    Transform HighBrock;
+    //[SerializeField]
+    //float targetDiff,       // 橋にするときに重ならないように引くやつ
+    //      moveSpeed;        // 橋になるときのスピード
 
-    float actionPush = 0f,
-          push1 = 3;
+    //[SerializeField]
+    //GameObject Bridge;        // 橋の透明ブロック
 
-    [SerializeField]
-    float enemyY = 0.5f,
-          enemyZ = 0.25f;
 
-    // Start is called before the first frame update
+    private Animator anim;
     void Start()
     {
-       
+        //Bridge.SetActive(false);
+
+        anim = GetComponent<Animator>();
 
         // RedEnemyオブジェクトと、タグ:Enemyを紐づける
         RedEnemy = GameObject.FindGameObjectsWithTag("Enemy");
@@ -43,99 +38,65 @@ public class EnemyActionScript : MonoBehaviour
         {
             enemyList.Add(obj);
         }
+
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Debug.Log(actionPush);
+
     }
 
-    //// 赤ハコベロスが骨に当たったら消えるスクリプト
-    //// ※全部消える
-    //public void OnCollisionEnter(Collision collision)
-    //{
-    //    // タグ:Enemyをenemys配列に入れる
-    //    GameObject[] enemys = GameObject.FindGameObjectsWithTag("Enemy");
+    // 実験 アニメーションで無理やり動かす
+    
+    public void BridgeAction()
+    {
+        StartCoroutine("EnemyBridge");
+    }
 
-    //    // Boneというタグに当たったら
-    //    if (collision.gameObject.tag == "Bone")
-    //    {
-    //        // enemysに入っているオブジェクトにredと名付けてから全て消す
-    //        foreach(GameObject red in enemys)
-    //        {
-    //            Destroy(red);
-    //        }
-    //    }
-    //}
-
-    // 実験 積み立てまでは動いた
-    public void OnTriggerStay(Collider other)
+   
+    IEnumerator EnemyBridge()
     {
         GameObject[] nav = GameObject.FindGameObjectsWithTag("Enemy");
 
-        Debug.Log("haitta");
+        //Bridge.SetActive(true);
 
-        if (Input.GetKey(KeyCode.Space))
-        {
-            // 秒数を数える
-            actionPush += Time.deltaTime;
+        // リストを逆順(後ろから動くので)
+        //enemyList.Reverse();
 
-            // 3秒経ったら
-            if (actionPush >= push1)
-            {
-                Debug.Log("3秒経過");
-
-                StartCoroutine("EnemyHighMove");
-            }
-
-        }
-
-        else if(!Input.GetKeyUp(KeyCode.Space))
-        {
-            actionPush = 0;
-
-        }
-    }
-
-    IEnumerator EnemyHighMove()
-    {
-        GameObject[] nav = GameObject.FindGameObjectsWithTag("Enemy");
-
-        // 簡単な表記にするために
-        Vector3 firstPos = enemyList[0].transform.position;
-        Vector3 h_brockPos = HighBrock.transform.position;
-
-        // エネミーの移動
-        enemyList[0].transform.position = new Vector3(h_brockPos.x, h_brockPos.y, h_brockPos.z - enemyZ);
-        enemyList[1].transform.position = new Vector3(firstPos.x, firstPos.y + enemyY, firstPos.z);
-        Debug.Log("アクション");
-
-        // enemyのスクリプトとAIコンポーネントをfalse
+        // 邪魔なのでいったん外しとく
         foreach (GameObject obj in nav)
         {
             obj.GetComponent<EnemyFollowScript>().enabled = false;
             obj.GetComponent<NavMeshAgent>().enabled = false;
-        }
-
-        yield return new WaitForSeconds(3f);
-
-        // Plyerと赤ハコベロスの障害物上に移動
-        this.transform.position = new Vector3(h_brockPos.x, h_brockPos.y + 1f, h_brockPos.z);
-        enemyList[0].transform.position = new Vector3(h_brockPos.x, h_brockPos.y + 1f, h_brockPos.z);
-        enemyList[1].transform.position = new Vector3(h_brockPos.x, h_brockPos.y + 1f, h_brockPos.z);
-
-        yield return new WaitForSeconds(1f);
-
-        // 外したコンポーネントを再度ON
-        foreach (GameObject obj in nav)
-        {
-            obj.GetComponent<EnemyFollowScript>().enabled = true;
-            obj.GetComponent<NavMeshAgent>().enabled = true;
 
         }
+
+        anim.SetBool("Enemy1", true);
+
+        yield return new WaitForSeconds(1.5f);
+
+
+        //// エネミーの移動
+        //Debug.Log("アクション開始");
+
+        //enemyList[0].transform.position = Vector3.MoveTowards(enemyList[0].transform.position, Bridge.transform.position, moveSpeed);
+
+
+        //enemyList[1].transform.position = Vector3.MoveTowards(enemyList[1].transform.position, Bridge2.transform.position, moveSpeed);
+
+        //yield return new WaitForSeconds(3f);
+
+        //// Plyerと赤ハコベロスの障害物上に移動
+
+        //yield return new WaitForSeconds(1f);
+
+        //Bridge.SetActive(false);
+        //// 外したコンポーネントを再度ON
+        //foreach (GameObject obj in nav)
+        //{
+        //    obj.GetComponent<EnemyFollowScript>().enabled = true;
+        //    obj.GetComponent<NavMeshAgent>().enabled = true;
+
+        //}
     }
-
-
-
 }

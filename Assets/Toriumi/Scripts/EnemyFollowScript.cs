@@ -35,4 +35,9 @@ public class EnemyFollowScript : MonoBehaviour
         // ‚±‚Ì‹——£‚Ü‚Å‹ß‚Ã‚¢‚½‚çŽ~‚Ü‚é
         age.stoppingDistance = StopDis;
     }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        transform.parent = GameObject.Find("EnemyManager").transform;
+    }
 }

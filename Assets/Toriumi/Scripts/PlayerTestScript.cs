@@ -5,54 +5,111 @@ using UnityEngine;
 public class PlayerTestScript : MonoBehaviour
 {
     [SerializeField]
-    float speed =1.0f;
+    float _speed =1.0f;
 
-    Rigidbody rb;
+    private Rigidbody rb;
 
-    Vector3 player_Pos;
+    private Vector3 playerPos;
 
-    // Start is called before the first frame update
+    private float actionPush = 0f,
+                  push1 = 3;
+
+    public EnemyActionScript enemyAct;
+
+    bool start = false;
+
     void Start()
     {
-        player_Pos = GetComponent<Transform>().position;
+        playerPos = GetComponent<Transform>().position;
         rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
+
+
         // 前
-        if(Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.UpArrow))
         {
-            rb.velocity = new Vector3(0, 0, speed);
+            rb.velocity = new Vector3(0, 0, _speed);
         }
 
         // 後
         if (Input.GetKey(KeyCode.DownArrow))
         {
-            rb.velocity = new Vector3(0, 0, -speed);
+            rb.velocity = new Vector3(0, 0, -_speed);
         }
 
         // 右
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            rb.velocity = new Vector3(speed, 0, 0);
+            rb.velocity = new Vector3(_speed, 0, 0);
 
         }
 
         // 左
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            rb.velocity = new Vector3(-speed, 0, 0);
+            rb.velocity = new Vector3(-_speed, 0, 0);
         }
 
-        if(Input.GetKeyUp(KeyCode.UpArrow) ||
-           Input.GetKeyUp(KeyCode.DownArrow) ||
-           Input.GetKeyUp(KeyCode.RightArrow) ||
-           Input.GetKeyUp(KeyCode.LeftArrow))
+        if (Input.GetKeyUp(KeyCode.UpArrow) ||
+        Input.GetKeyUp(KeyCode.DownArrow) ||
+        Input.GetKeyUp(KeyCode.RightArrow) ||
+        Input.GetKeyUp(KeyCode.LeftArrow))
         {
             rb.velocity = Vector3.zero;
         }
+
+        Vector3 diff = transform.position - playerPos;
+
+        if(diff.magnitude > 0.01f)
+        {
+            transform.rotation = Quaternion.LookRotation(diff);
+        }
+
+        playerPos = transform.position;
+
+        if(start)
+        {
+            enemyAct.BridgeAction();
+        }
+
+    }
+
+    public void OnTriggerStay(Collider other)
+    {
+        Debug.Log("入った");
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+
+            Debug.Log(actionPush);
+
+            // 秒数を数える
+            actionPush += Time.deltaTime;
+
+            // 3秒経ったら
+            if (actionPush >= push1)
+            {
+                Debug.Log("3秒経過");
+                start = true;
+            }
+            else
+            {
+                Debug.Log("3秒ない、テキスト表示");
+            }
+
+        }
+
+        else if (!Input.GetKeyUp(KeyCode.Space))
+        {
+            actionPush = 0;
+
+        }
     }
 }
+
+
 
