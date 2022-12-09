@@ -5,23 +5,43 @@ using UnityEngine.UI;
 
 public class Goal : MonoBehaviour
 {
+    
 
-   /* private int counter = 0;
+    private int counter = 0;
 
+    // ステージでアクションボタンを押す回数
     [SerializeField]
     private int Goalcount = 0;
 
+    bool Push = false;
+
+    
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
-        {
-            counter++;
 
+       
+        //spaceはアクションボタンのキーを入れてください
+            if (Input.GetKey("space"))
+            {
+                if (Push == false)  
+                {
+                Debug.Log("押された");
+                counter++;
+                Push = true;   
+                }
+            }
+            else
+            {
+        
+            Push = false;
+           
+            
         }
 
+           
         
-    }*/
-
+    }
+      
 
     private void OnTriggerEnter(Collider other)
     {
@@ -29,8 +49,8 @@ public class Goal : MonoBehaviour
         // Debug.Log("hit");
 
 
-       // if (counter >= Goalcount)
-       // {
+        if (counter >= Goalcount)
+        {
             //もしゴールオブジェクトのコライダーに接触した時の処理。
             if (other.tag == "Player")
             {
@@ -41,6 +61,6 @@ public class Goal : MonoBehaviour
                 other.gameObject.SetActive(false);
             }
         }
-   // }
+   }
     
 }

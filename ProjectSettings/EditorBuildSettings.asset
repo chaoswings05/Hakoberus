@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Yoshimura/Scenes/Title.unity
+    guid: 4bae47fc149d8224497d4bae24c77f5b
+  - enabled: 1
+    path: Assets/Yoshimura/Scenes/Stage.unity
+    guid: 89ca1f3905f5b9f4a837dbac139941c7
   m_configObjects: {}
