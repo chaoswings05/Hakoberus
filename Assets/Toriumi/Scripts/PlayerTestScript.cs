@@ -5,18 +5,11 @@ using UnityEngine;
 public class PlayerTestScript : MonoBehaviour
 {
     [SerializeField]
-    float _speed =1.0f;
+    float _speed = 1.0f;
 
     private Rigidbody rb;
 
     private Vector3 playerPos;
-
-    private float actionPush = 0f,
-                  push1 = 3;
-
-    public EnemyActionScript enemyAct;
-
-    bool start = false;
 
     void Start()
     {
@@ -27,8 +20,6 @@ public class PlayerTestScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-
         // 前
         if (Input.GetKey(KeyCode.UpArrow))
         {
@@ -70,44 +61,6 @@ public class PlayerTestScript : MonoBehaviour
         }
 
         playerPos = transform.position;
-
-        if(start)
-        {
-            enemyAct.BridgeAction();
-        }
-
-    }
-
-    public void OnTriggerStay(Collider other)
-    {
-        Debug.Log("入った");
-
-        if (Input.GetKey(KeyCode.Space))
-        {
-
-            Debug.Log(actionPush);
-
-            // 秒数を数える
-            actionPush += Time.deltaTime;
-
-            // 3秒経ったら
-            if (actionPush >= push1)
-            {
-                Debug.Log("3秒経過");
-                start = true;
-            }
-            else
-            {
-                Debug.Log("3秒ない、テキスト表示");
-            }
-
-        }
-
-        else if (!Input.GetKeyUp(KeyCode.Space))
-        {
-            actionPush = 0;
-
-        }
     }
 }
 
