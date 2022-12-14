@@ -7,6 +7,6 @@ public class MoveScene : MonoBehaviour
 {
     public void OnClickStartButton()
     {
-        SceneManager.LoadScene("Stage");
+        SceneManager.LoadScene("Stage1");
     }
 }

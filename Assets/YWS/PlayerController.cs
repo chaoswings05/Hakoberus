@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private bool IsPileUp = false;
     private bool IsClimbing = false;
     private bool ClimbFinish = false;
+    private bool IsBuildBridge = false;
 
     void Update()
     {
@@ -84,7 +85,14 @@ public class PlayerController : MonoBehaviour
             {
                 pileUpPos = other.gameObject.GetComponent<ActionArea>().targetPoint;
                 actionCost = other.gameObject.GetComponent<ActionArea>().needNum;
-                IsPileUp = true;
+                if (other.gameObject.GetComponent<ActionArea>().IsPileUp)
+                {
+                    IsPileUp = true;
+                }
+                else if (other.gameObject.GetComponent<ActionArea>().IsBuildBridge)
+                {
+                    IsBuildBridge = true;
+                }
             }
             //アクションに必要な分の赤ハコベロスを連れている時だけアクションを行う許可を出す
             if (followingEnemy.Count >= actionCost)
@@ -247,6 +255,8 @@ public class PlayerController : MonoBehaviour
                 //仮
                 foreach(Enemy obj in followingEnemy)
                 {
+                    obj.tag = "Enemy";
+                    obj.gameObject.layer = 7;
                     obj.transform.position = this.transform.position;
                     obj.IsAction = false;
                     obj.PileUpFinish = false;

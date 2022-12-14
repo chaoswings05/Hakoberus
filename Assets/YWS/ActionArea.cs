@@ -7,7 +7,8 @@ public class ActionArea : MonoBehaviour
 {
     [SerializeField, Header("アクションを行う場所")] public Transform targetPoint = null;
     [Header("行うアクション")]
-    [SerializeField] public bool IsPileUp = false;
+    public bool IsPileUp = false;
+    public bool IsBuildBridge = false;
     [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
     [SerializeField] private Text NeedNumDisplay = null;
     public int PayedCost = 0;
