@@ -10,7 +10,7 @@ public class ActionArea : MonoBehaviour
     [SerializeField] public bool IsPileUp = false;
     [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
     [SerializeField] private Text NeedNumDisplay = null;
-    public bool IsCostPayed = false;
+    public int PayedCost = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -21,9 +21,6 @@ public class ActionArea : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (IsCostPayed)
-        {
-            NeedNumDisplay.text = needNum.ToString() + " / " + needNum.ToString();
-        }
+        NeedNumDisplay.text = PayedCost.ToString() + " / " + needNum.ToString();
     }
 }

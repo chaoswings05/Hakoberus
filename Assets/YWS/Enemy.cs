@@ -9,7 +9,8 @@ public class Enemy : MonoBehaviour
     private GameObject followPos = null;
     [SerializeField] private float speed = 0.1f;
     [SerializeField] private Rigidbody rb = null;
-    public int thisNum = 0;
+    public int followNum = 0;
+    public int actionNum = 0;
     public Transform actionTargetPos = null; //アクションを行う場所
     public Bone bone = null;
     public Transform BoneDestroyPos = null; //骨を持っていく場所
@@ -19,6 +20,7 @@ public class Enemy : MonoBehaviour
     public bool IsPileUp = false; //階段積み上げアクションを行うかどうか
     public bool NeedJump = false; //アクションを行う時、ジャンプをする必要があるかどうか
     private bool IsJumping = false;
+    public bool PileUpFinish = false;
 
     void Start()
     {
@@ -29,7 +31,16 @@ public class Enemy : MonoBehaviour
     {
         SetFollowPoint();
 
-        if (!IsAction)
+        //もしBoneになにか入っている場合
+        if(bone != null)
+        {
+            bone.transform.position = transform.position + Vector3.forward * 0.5f;//targetObjectを上にする
+            bone.transform.SetParent(transform); //Boneと自分をくっつける
+            BoneDestroyPos = bone.boneDestroyPos;
+            IsBoneDestroy = true; //家に向かう
+        }
+
+        if (!IsAction && !IsBoneDestroy)
         {
             if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.5f)
             {
@@ -48,15 +59,6 @@ public class Enemy : MonoBehaviour
             transform.position += transform.forward * speed;
         }
         
-        //もしBoneになにか入っている場合
-        if(bone != null)
-        {
-            bone.transform.position = transform.position + Vector3.forward * 0.5f;//targetObjectを上にする
-            bone.transform.SetParent(transform); //Boneと自分をくっつける
-            BoneDestroyPos = bone.boneDestroyPos;
-            IsBoneDestroy = true;//家に向かう
-        }
-
         //骨を消す場所に行く時
         if(IsBoneDestroy)
         {
@@ -83,33 +85,41 @@ public class Enemy : MonoBehaviour
             {
                 transform.position = actionTargetPos.position;
                 transform.rotation = Quaternion.identity;
-                //IsAction = false;
                 IsPileUp = false;
                 this.tag = "Stair";
+                this.gameObject.layer = 0;
+                PileUpFinish = true;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
             }
             else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1.5f)
             {
-                IsJumping = true;
                 rb.useGravity = false;
-                transform.DOJump(actionTargetPos.position + new Vector3(0,thisNum*0.35f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
+                if (!IsJumping)
+                {
+                    transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
+                }
+                IsJumping = true;
             }
         }
     }
 
     private void SetFollowPoint()
     {
-        followPos = followPosArray[thisNum];
+        followPos = followPosArray[followNum];
     }
 
     private void JumpFinish()
     {
         NeedJump = false;
         transform.position = actionTargetPos.position;
-        transform.position += new Vector3(0,thisNum * 0.35f,0);
+        transform.position += new Vector3(0,actionNum * 0.5f,0);
         transform.rotation = Quaternion.identity;
         IsPileUp = false;
         IsJumping = false;
         this.tag = "Stair";
+        this.gameObject.layer = 0;
+        PileUpFinish = true;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
     }
 
     public void CancelAction()
@@ -119,6 +129,9 @@ public class Enemy : MonoBehaviour
         NeedJump = false;
         IsJumping = false;
         rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
         IsFollow = true;
+        this.tag = "Enemy";
+        this.gameObject.layer = 7;
     }
 }

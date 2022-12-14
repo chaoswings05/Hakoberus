@@ -15,17 +15,31 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Header("アクションの必要時間")] private float actionTime = 3f;
     [SerializeField] private GaugeController gaugeController = null;
     private int actionCost = 0; //アクションに必要な赤ハコベロスの数
-    [SerializeField] private float enemyY = 0.5f;
-    [SerializeField] private float enemyZ = 0.75f;
+    private int PayedCost = 0;
     private bool InAction = false;
     private bool IsActionCharging = false;
     private bool IsActionConfirm = false;
     private bool IsEnemyMoving = false;
     private bool IsPileUp = false;
+    private bool IsClimbing = false;
+    private bool ClimbFinish = false;
 
     void Update()
     {
         SetEnemyNum();
+        if (CanAction)
+        {
+            UpdateNotice();
+        }
+
+        if (IsActionConfirm && CheckIsEnemyActionFinish())
+        {
+            InAction = true;
+            if (IsPileUp)
+            {
+                ClimbUp();
+            }
+        }
 
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -39,10 +53,6 @@ public class PlayerController : MonoBehaviour
             transform.LookAt(direction);
             rb.velocity = (new Vector3(x,0,z) * speed + Vector3.down * gravSpeed);
         }
-        //else
-        //{
-            //rb.velocity = Vector3.zero;
-        //}
 
         if (IsActionCharging && !IsEnemyMoving)
         {
@@ -53,9 +63,12 @@ public class PlayerController : MonoBehaviour
 
     private void SetEnemyNum()
     {
-        for (int i = 0; i < followingEnemy.Count; i++)
+        int actionNum = 0;
+        for (int i = followingEnemy.Count-1; i > -1; i--)
         {
-            followingEnemy[i].thisNum = i;
+            followingEnemy[i].followNum = i;
+            followingEnemy[i].actionNum = actionNum;
+            actionNum++;
         }
     }
     
@@ -107,10 +120,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (other.tag == "ActionPoint")
+        {
+            other.gameObject.GetComponent<ActionArea>().PayedCost = PayedCost;
+        }
+
         //CanAction状態でアクションボタンを長押しする場合
         if (Input.GetButton("DS4x") || Input.GetKey(KeyCode.Space))
         {
-            if (CanAction)
+            if (CanAction && !IsActionConfirm)
             {
                 IsActionCharging = true;
                 // 秒数を数える
@@ -127,8 +145,6 @@ public class PlayerController : MonoBehaviour
                     //アクションゲージを消す
                     gaugeController.gameObject.SetActive(false);
                     gaugeController.DrawGauge(0);
-                    //StartCoroutine(EnemyMoveToTargetArea());
-                    other.gameObject.GetComponent<ActionArea>().IsCostPayed = true;
                 }
             }
         }
@@ -136,6 +152,8 @@ public class PlayerController : MonoBehaviour
         else if(!Input.GetButtonUp("DS4x") || !Input.GetKeyUp(KeyCode.Space))
         {
             //アクションを開始する前の状態に戻す
+            IsActionCharging = false;
+            PayedCost = 0;
             actionPush = 0;
             gaugeController.gameObject.SetActive(false);
             gaugeController.DrawGauge(0);
@@ -161,12 +179,13 @@ public class PlayerController : MonoBehaviour
             gaugeController.DrawGauge(0);
             CanAction = false;
             actionCost = 0;
-            IsPileUp = false;
             if (!IsActionConfirm)
             {
+                other.gameObject.GetComponent<ActionArea>().PayedCost = 0;
                 foreach (Enemy obj in followingEnemy)
                 {
                     obj.CancelAction();
+                    IsPileUp = false;
                 }
             }
         }
@@ -174,7 +193,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator EnemyMoveToTargetArea()
     {
-        for (int i = 0; i < actionCost; i++)
+        for (int i = actionCost-1; i > -1; i--)
         {
             followingEnemy[i].actionTargetPos = pileUpPos;
             followingEnemy[i].IsFollow = false;
@@ -182,7 +201,7 @@ public class PlayerController : MonoBehaviour
             if (IsPileUp)
             {
                 followingEnemy[i].IsPileUp = true;
-                if (i > 0)
+                if (actionCost-1 > i)
                 {
                     followingEnemy[i].NeedJump = true;
                 }
@@ -192,42 +211,87 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void MoveToTargetArea()
+    private void ClimbUp()
     {
-        InAction = true;
-        // 簡単な表記にするために
-        Vector3 targetPos = pileUpPos.transform.position;
-
-        // エネミーの移動
-        // エネミーのプレイヤー追随を無効にする
-        /*foreach (Enemy obj in followingEnemy)
+        rb.useGravity = false;
+        if (!IsClimbing && !ClimbFinish)
         {
-            obj.IsFollow = false;
-        }*/
+            transform.LookAt(pileUpPos);
+            transform.position += transform.forward * 0.1f;
+        }
 
-        if (actionCost <= followingEnemy.Count)
+        if (!IsClimbing && !ClimbFinish && Vector3.Distance(transform.position, pileUpPos.position) <= 0.3f)
         {
-            for (int i = 0; i < actionCost; i++)
+            IsClimbing = true;
+            transform.position = pileUpPos.position - new Vector3(0,0,0.3f);
+            transform.rotation = Quaternion.Euler(0,-90,90);
+        }
+
+        if (IsClimbing && !ClimbFinish)
+        {
+            transform.position += Vector3.up * 0.1f;
+            if (1.5f - transform.position.y <= 0.1f)
             {
-                followingEnemy[i].IsFollow = false;
-                followingEnemy[i].transform.position = new Vector3(targetPos.x, targetPos.y + enemyY * i, targetPos.z - enemyZ);
+                IsClimbing = false;
+                ClimbFinish = true;
+                transform.rotation = Quaternion.identity;
             }
         }
-        Debug.Log("アクション");
 
-
-        // Plyerと赤ハコベロスの障害物上に移動
-        this.transform.position = new Vector3(targetPos.x, targetPos.y + 1f, targetPos.z);
-        foreach (Enemy obj in followingEnemy)
+        if (ClimbFinish)
         {
-            obj.transform.position = new Vector3(targetPos.x, targetPos.y + 1f, targetPos.z);
+            Debug.Log(transform.position.z);
+            transform.position += transform.forward * 0.1f;
+            if (1.1f - transform.localPosition.z <= 0.1f)
+            {
+                //仮
+                foreach(Enemy obj in followingEnemy)
+                {
+                    obj.transform.position = this.transform.position;
+                    obj.IsAction = false;
+                    obj.PileUpFinish = false;
+                    obj.IsFollow = false;
+                }
+                ClimbFinish = false;
+                InAction = false;
+                IsActionConfirm = false;
+                IsPileUp = false;
+            }
+        }
+    }
+
+    private void UpdateNotice()
+    {
+        PayedCost = 0;
+        for (int i = 0; i < actionCost; i++)
+        {
+            if (IsPileUp && followingEnemy[i].PileUpFinish)
+            {
+                PayedCost++;
+            }
+        }
+    }
+
+    private bool CheckIsEnemyActionFinish()
+    {
+        int finishedNum = 0;
+        for (int i = 0; i < actionCost; i++)
+        {
+            if (IsPileUp && followingEnemy[i].PileUpFinish)
+            {
+                finishedNum++;
+            }
         }
 
-
-        // 外したコンポーネントを再度ON
-        foreach (Enemy obj in followingEnemy)
+        if (finishedNum == actionCost)
         {
-            obj.GetComponent<Enemy>().IsFollow = true;
+            IsActionCharging = false;
+            IsEnemyMoving = false;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }
