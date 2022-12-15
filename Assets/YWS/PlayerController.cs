@@ -8,22 +8,25 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Header("移動速度")] private float speed = 2f;
     [SerializeField, Header("重力の値")] private float gravSpeed = 1f;
     public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
-    private Transform pileUpPos = null; //赤ハコベロスをが積み上げる場所の
     [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
     private bool CanAction = false; //アクションを行える状態なのか
-    private float actionPush = 0f; //アクションボタンを長押した時間
     [SerializeField, Header("アクションの必要時間")] private float actionTime = 3f;
-    [SerializeField] private GaugeController gaugeController = null;
+    private float actionPush = 0f; //アクションボタンを長押した時間
     private int actionCost = 0; //アクションに必要な赤ハコベロスの数
     private int PayedCost = 0;
     private bool InAction = false;
     private bool IsActionCharging = false;
     private bool IsActionConfirm = false;
     private bool IsEnemyMoving = false;
+    private Transform actionPos = null; //赤ハコベロスがアクションを行う場所
+    private Transform actionEndPos = null;
     private bool IsPileUp = false;
     private bool IsClimbing = false;
     private bool ClimbFinish = false;
     private bool IsBuildBridge = false;
+    private bool arrivalCentral = false;
+    private bool CrossBridgeFinish = false;
+    [SerializeField] private GaugeController gaugeController = null;
 
     void Update()
     {
@@ -39,6 +42,10 @@ public class PlayerController : MonoBehaviour
             if (IsPileUp)
             {
                 ClimbUp();
+            }
+            if (IsBuildBridge)
+            {
+                CrossBridge();
             }
         }
 
@@ -81,19 +88,18 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("範囲内に入りました");
             //アクションを行う目標地点とアクションを行うための赤ハコベロスの数を取得
+            actionPos = other.gameObject.GetComponent<ActionArea>().targetPoint;
+            actionCost = other.gameObject.GetComponent<ActionArea>().needNum;
             if (other.gameObject.GetComponent<ActionArea>().IsPileUp)
             {
-                pileUpPos = other.gameObject.GetComponent<ActionArea>().targetPoint;
-                actionCost = other.gameObject.GetComponent<ActionArea>().needNum;
-                if (other.gameObject.GetComponent<ActionArea>().IsPileUp)
-                {
-                    IsPileUp = true;
-                }
-                else if (other.gameObject.GetComponent<ActionArea>().IsBuildBridge)
-                {
-                    IsBuildBridge = true;
-                }
+                IsPileUp = true;
             }
+            if (other.gameObject.GetComponent<ActionArea>().IsBuildBridge)
+            {
+                IsBuildBridge = true;
+            }
+            actionEndPos = other.gameObject.GetComponent<ActionArea>().endPoint;
+
             //アクションに必要な分の赤ハコベロスを連れている時だけアクションを行う許可を出す
             if (followingEnemy.Count >= actionCost)
             {
@@ -160,7 +166,6 @@ public class PlayerController : MonoBehaviour
         else if(!Input.GetButtonUp("DS4x") || !Input.GetKeyUp(KeyCode.Space))
         {
             //アクションを開始する前の状態に戻す
-            IsActionCharging = false;
             PayedCost = 0;
             actionPush = 0;
             gaugeController.gameObject.SetActive(false);
@@ -171,8 +176,14 @@ public class PlayerController : MonoBehaviour
                 foreach (Enemy obj in followingEnemy)
                 {
                     obj.CancelAction();
+                    if (IsActionCharging)
+                    {
+                        obj.WrapToFollowPoint();
+                    }
                 }
             }
+            IsActionCharging = false;
+            IsEnemyMoving = false;
         }
     }
 
@@ -186,16 +197,22 @@ public class PlayerController : MonoBehaviour
             gaugeController.gameObject.SetActive(false);
             gaugeController.DrawGauge(0);
             CanAction = false;
-            actionCost = 0;
             if (!IsActionConfirm)
             {
+                actionCost = 0;
                 other.gameObject.GetComponent<ActionArea>().PayedCost = 0;
                 foreach (Enemy obj in followingEnemy)
                 {
                     obj.CancelAction();
+                    if (IsActionCharging)
+                    {
+                        obj.WrapToFollowPoint();
+                    }
                     IsPileUp = false;
                 }
             }
+            IsActionCharging = false;
+            IsEnemyMoving = false;
         }
     }
 
@@ -203,16 +220,21 @@ public class PlayerController : MonoBehaviour
     {
         for (int i = actionCost-1; i > -1; i--)
         {
-            followingEnemy[i].actionTargetPos = pileUpPos;
             followingEnemy[i].IsFollow = false;
             followingEnemy[i].IsAction = true;
             if (IsPileUp)
             {
+                followingEnemy[i].actionTargetPos = actionPos;
                 followingEnemy[i].IsPileUp = true;
                 if (actionCost-1 > i)
                 {
                     followingEnemy[i].NeedJump = true;
                 }
+            }
+            if (IsBuildBridge)
+            {
+                followingEnemy[i].actionTargetPos = actionPos;
+                followingEnemy[i].IsBuildBridge = true;
             }
             
             yield return new WaitForSeconds(1f);
@@ -224,14 +246,14 @@ public class PlayerController : MonoBehaviour
         rb.useGravity = false;
         if (!IsClimbing && !ClimbFinish)
         {
-            transform.LookAt(pileUpPos);
+            transform.LookAt(actionPos);
             transform.position += transform.forward * 0.1f;
         }
 
-        if (!IsClimbing && !ClimbFinish && Vector3.Distance(transform.position, pileUpPos.position) <= 0.3f)
+        if (!IsClimbing && !ClimbFinish && Vector3.Distance(transform.position, actionPos.position) <= 0.3f)
         {
             IsClimbing = true;
-            transform.position = pileUpPos.position - new Vector3(0,0,0.3f);
+            transform.position = actionPos.position - new Vector3(0,0,0.3f);
             transform.rotation = Quaternion.Euler(0,-90,90);
         }
 
@@ -248,26 +270,64 @@ public class PlayerController : MonoBehaviour
 
         if (ClimbFinish)
         {
-            Debug.Log(transform.position.z);
             transform.position += transform.forward * 0.1f;
             if (1.1f - transform.localPosition.z <= 0.1f)
             {
-                //仮
-                foreach(Enemy obj in followingEnemy)
-                {
-                    obj.tag = "Enemy";
-                    obj.gameObject.layer = 7;
-                    obj.transform.position = this.transform.position;
-                    obj.IsAction = false;
-                    obj.PileUpFinish = false;
-                    obj.IsFollow = false;
-                }
+                StartCoroutine(EnemyJumpToEndPoint());
                 ClimbFinish = false;
-                InAction = false;
-                IsActionConfirm = false;
                 IsPileUp = false;
             }
         }
+    }
+
+    private void CrossBridge()
+    {
+        Vector3 CentralLocation = new Vector3(actionPos.position.x, this.transform.position.y, actionPos.position.z);
+
+        if (!arrivalCentral && !CrossBridgeFinish)
+        {
+            transform.LookAt(CentralLocation);
+            transform.position += transform.forward * 0.1f;
+        }
+
+        if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
+        {
+            arrivalCentral = true;
+            transform.position = CentralLocation;
+        }
+
+        if (arrivalCentral)
+        {
+            transform.LookAt(actionEndPos.position);
+            transform.position += transform.forward * 0.1f;
+        }
+
+        if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
+        {
+            transform.position = actionEndPos.position;
+            arrivalCentral = false;
+            CrossBridgeFinish = true;
+        }
+
+        if (CrossBridgeFinish)
+        {
+            StartCoroutine(EnemyJumpToEndPoint());
+            IsBuildBridge = false;
+            CrossBridgeFinish = false;
+        }
+    }
+
+    private IEnumerator EnemyJumpToEndPoint()
+    {
+        Debug.Log("Started");
+        for (int i = 0; i < actionCost; i++)
+        {
+            Debug.Log("i" + i);
+            followingEnemy[i].JumpToEndPoint(actionEndPos.position);
+            
+            yield return new WaitForSeconds(1f);
+        }
+        ResetAfterActionFinish();
     }
 
     private void UpdateNotice()
@@ -291,6 +351,11 @@ public class PlayerController : MonoBehaviour
             {
                 finishedNum++;
             }
+
+            if (IsBuildBridge && followingEnemy[i].BuildFinish)
+            {
+                finishedNum++;
+            }
         }
 
         if (finishedNum == actionCost)
@@ -303,5 +368,20 @@ public class PlayerController : MonoBehaviour
         {
             return false;
         }
+    }
+
+    private void ResetAfterActionFinish()
+    {
+        foreach(Enemy obj in followingEnemy)
+        {
+            obj.tag = "Enemy";
+            obj.gameObject.layer = 7;
+            obj.IsAction = false;
+            obj.PileUpFinish = false;
+            obj.BuildFinish = false;
+            obj.IsFollow = false;
+        }
+        InAction = false;
+        IsActionConfirm = false;
     }
 }

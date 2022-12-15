@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Goal
   - Stair
+  - Bridge
   layers:
   - Default
   - TransparentFX

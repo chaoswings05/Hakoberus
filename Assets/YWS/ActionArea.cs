@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class ActionArea : MonoBehaviour
 {
     [SerializeField, Header("アクションを行う場所")] public Transform targetPoint = null;
+    [SerializeField, Header("アクションが終了する場所")] public Transform endPoint = null;
     [Header("行うアクション")]
     public bool IsPileUp = false;
     public bool IsBuildBridge = false;

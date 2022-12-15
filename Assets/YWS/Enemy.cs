@@ -21,6 +21,8 @@ public class Enemy : MonoBehaviour
     public bool NeedJump = false; //アクションを行う時、ジャンプをする必要があるかどうか
     private bool IsJumping = false;
     public bool PileUpFinish = false;
+    public bool IsBuildBridge = false;
+    public bool BuildFinish = false;
 
     void Start()
     {
@@ -37,6 +39,7 @@ public class Enemy : MonoBehaviour
             bone.transform.position = transform.position + Vector3.forward * 0.5f;//targetObjectを上にする
             bone.transform.SetParent(transform); //Boneと自分をくっつける
             BoneDestroyPos = bone.boneDestroyPos;
+            bone.gameObject.layer = 7;
             IsBoneDestroy = true; //家に向かう
         }
 
@@ -101,6 +104,27 @@ public class Enemy : MonoBehaviour
                 IsJumping = true;
             }
         }
+
+        if (IsAction && IsBuildBridge)
+        {
+            rb.useGravity = false;
+            if (!BuildFinish)
+            {
+                transform.LookAt(actionTargetPos.position);
+                transform.position += transform.forward * speed;
+            }
+
+            if (Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
+            {
+                transform.position = actionTargetPos.position;
+                transform.rotation = Quaternion.identity;
+                IsBuildBridge = false;
+                this.tag = "Bridge";
+                this.gameObject.layer = 0;
+                BuildFinish = true;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+        }
     }
 
     private void SetFollowPoint()
@@ -126,12 +150,27 @@ public class Enemy : MonoBehaviour
     {
         IsAction = false;
         IsPileUp = false;
+        IsBuildBridge = false;
         NeedJump = false;
         IsJumping = false;
+        PileUpFinish = false;
+        BuildFinish = false;
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         IsFollow = true;
         this.tag = "Enemy";
         this.gameObject.layer = 7;
+    }
+
+    public void WrapToFollowPoint()
+    {
+        transform.position = followPos.transform.position;
+        transform.rotation = Quaternion.identity;
+    }
+
+    public void JumpToEndPoint(Vector3 actionEndPos)
+    {
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+        transform.DOJump(actionEndPos, 0.5f, 1, 0.5f);
     }
 }
