@@ -824,8 +824,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 652413694}
-        m_TargetAssemblyTypeName: ReturnTitle, Assembly-CSharp
-        m_MethodName: SceneChange_GameClearToTitle
+        m_TargetAssemblyTypeName: GameClearSceneChange, Assembly-CSharp
+        m_MethodName: ReturnTitle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

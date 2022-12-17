@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ReturnTitle : MonoBehaviour
+public class GameClearSceneChange : MonoBehaviour
 {
     void Update()
     {
         if (Input.GetButtonDown("DS4x"))
         {
-            SceneChange_GameClearToTitle();
+            ReturnTitle();
         }
     }
 
-    public void SceneChange_GameClearToTitle()
+    public void ReturnTitle()
     {
         SceneManager.LoadScene("Title");
     }

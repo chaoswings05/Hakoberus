@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameClear : MonoBehaviour
+public class MainGameSceneChange : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if (other.tag == "Player" && other.gameObject.GetComponent<PlayerController>().followingEnemy.Count == 0)
         {
-            SceneChange_MainGameToGameClear();
+            GameClear();
         }     
     }
 
-    private void SceneChange_MainGameToGameClear()
+    private void GameClear()
     {
         SceneManager.LoadScene("GameClear");
     }
