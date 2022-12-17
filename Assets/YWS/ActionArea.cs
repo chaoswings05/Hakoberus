@@ -25,4 +25,16 @@ public class ActionArea : MonoBehaviour
     {
         NeedNumDisplay.text = PayedCost.ToString() + " / " + needNum.ToString();
     }
+
+    public void ActionFinish()
+    {
+        StartCoroutine(ResetPayedCost());
+    }
+
+    private IEnumerator ResetPayedCost()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        PayedCost = 0;
+    }
 }

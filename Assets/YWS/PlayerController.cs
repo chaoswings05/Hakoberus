@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Header("アクションの必要時間")] private float actionTime = 3f;
     private float actionPush = 0f; //アクションボタンを長押した時間
     private int actionCost = 0; //アクションに必要な赤ハコベロスの数
-    private int PayedCost = 0;
     private bool InAction = false;
     private bool IsActionCharging = false;
     private bool IsActionConfirm = false;
@@ -136,7 +135,7 @@ public class PlayerController : MonoBehaviour
     {
         if (other.tag == "ActionPoint")
         {
-            other.gameObject.GetComponent<ActionArea>().PayedCost = PayedCost;
+            other.gameObject.GetComponent<ActionArea>().PayedCost = UpdateNotice();
         }
 
         //CanAction状態でアクションボタンを長押しする場合
@@ -166,7 +165,6 @@ public class PlayerController : MonoBehaviour
         else if(!Input.GetButtonUp("DS4x") || !Input.GetKeyUp(KeyCode.Space))
         {
             //アクションを開始する前の状態に戻す
-            PayedCost = 0;
             actionPush = 0;
             gaugeController.HideGauge();
             gaugeController.DrawGauge(0);
@@ -210,6 +208,10 @@ public class PlayerController : MonoBehaviour
                     }
                     IsPileUp = false;
                 }
+            }
+            else
+            {
+                other.gameObject.GetComponent<ActionArea>().ActionFinish();
             }
             IsActionCharging = false;
             IsEnemyMoving = false;
@@ -330,16 +332,22 @@ public class PlayerController : MonoBehaviour
         ResetAfterActionFinish();
     }
 
-    private void UpdateNotice()
+    private int UpdateNotice()
     {
-        PayedCost = 0;
+        int PayedCost = 0;
         for (int i = 0; i < actionCost; i++)
         {
             if (IsPileUp && followingEnemy[i].PileUpFinish)
             {
                 PayedCost++;
             }
+
+            if (IsBuildBridge && followingEnemy[i].BuildFinish)
+            {
+                PayedCost++;
+            }
         }
+        return PayedCost;
     }
 
     private bool CheckIsEnemyActionFinish()
