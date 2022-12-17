@@ -148,7 +148,7 @@ public class PlayerController : MonoBehaviour
                 // 秒数を数える
                 actionPush += Time.deltaTime;
                 //アクションゲージを出す
-                gaugeController.gameObject.SetActive(true);
+                gaugeController.ShowGauge();
                 gaugeController.DrawGauge(actionPush);
 
                 // 3秒経ったら
@@ -157,7 +157,7 @@ public class PlayerController : MonoBehaviour
                     Debug.Log("3秒経過");
                     IsActionConfirm = true;
                     //アクションゲージを消す
-                    gaugeController.gameObject.SetActive(false);
+                    gaugeController.HideGauge();
                     gaugeController.DrawGauge(0);
                 }
             }
@@ -168,7 +168,7 @@ public class PlayerController : MonoBehaviour
             //アクションを開始する前の状態に戻す
             PayedCost = 0;
             actionPush = 0;
-            gaugeController.gameObject.SetActive(false);
+            gaugeController.HideGauge();
             gaugeController.DrawGauge(0);
             InAction = false;
             if (!IsActionConfirm)
@@ -194,7 +194,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("範囲内から離れました");
             //アクションを開始する前の状態に戻す
-            gaugeController.gameObject.SetActive(false);
+            gaugeController.HideGauge();
             gaugeController.DrawGauge(0);
             CanAction = false;
             if (!IsActionConfirm)
@@ -248,18 +248,19 @@ public class PlayerController : MonoBehaviour
         {
             transform.LookAt(actionPos);
             transform.position += transform.forward * 0.1f;
-        }
 
-        if (!IsClimbing && !ClimbFinish && Vector3.Distance(transform.position, actionPos.position) <= 0.3f)
-        {
-            IsClimbing = true;
-            transform.position = actionPos.position - new Vector3(0,0,0.3f);
-            transform.rotation = Quaternion.Euler(0,-90,90);
+            if (Vector3.Distance(transform.position, actionPos.position) <= 0.3f)
+            {
+                IsClimbing = true;
+                transform.position = actionPos.position - new Vector3(0,0,0.3f);
+                transform.rotation = Quaternion.Euler(0,-90,90);
+            }
         }
 
         if (IsClimbing && !ClimbFinish)
         {
             transform.position += Vector3.up * 0.1f;
+
             if (1.5f - transform.position.y <= 0.1f)
             {
                 IsClimbing = false;
@@ -271,6 +272,7 @@ public class PlayerController : MonoBehaviour
         if (ClimbFinish)
         {
             transform.position += transform.forward * 0.1f;
+
             if (1.1f - transform.localPosition.z <= 0.1f)
             {
                 StartCoroutine(EnemyJumpToEndPoint());
@@ -288,25 +290,25 @@ public class PlayerController : MonoBehaviour
         {
             transform.LookAt(CentralLocation);
             transform.position += transform.forward * 0.1f;
-        }
 
-        if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
-        {
-            arrivalCentral = true;
-            transform.position = CentralLocation;
+            if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
+            {
+                arrivalCentral = true;
+                transform.position = CentralLocation;
+            }
         }
 
         if (arrivalCentral)
         {
             transform.LookAt(actionEndPos.position);
             transform.position += transform.forward * 0.1f;
-        }
 
-        if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
-        {
-            transform.position = actionEndPos.position;
-            arrivalCentral = false;
-            CrossBridgeFinish = true;
+            if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
+            {
+                transform.position = actionEndPos.position;
+                arrivalCentral = false;
+                CrossBridgeFinish = true;
+            }
         }
 
         if (CrossBridgeFinish)
@@ -319,10 +321,8 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator EnemyJumpToEndPoint()
     {
-        Debug.Log("Started");
         for (int i = 0; i < actionCost; i++)
         {
-            Debug.Log("i" + i);
             followingEnemy[i].JumpToEndPoint(actionEndPos.position);
             
             yield return new WaitForSeconds(1f);

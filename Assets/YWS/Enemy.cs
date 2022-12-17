@@ -8,7 +8,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject[] followPosArray = new GameObject[5];
     private GameObject followPos = null;
     [SerializeField] private float speed = 0.1f;
-    [SerializeField] private Rigidbody rb = null;
     public int followNum = 0;
     public int actionNum = 0;
     public Transform actionTargetPos = null; //アクションを行う場所
@@ -92,11 +91,9 @@ public class Enemy : MonoBehaviour
                 this.tag = "Stair";
                 this.gameObject.layer = 0;
                 PileUpFinish = true;
-                rb.constraints = RigidbodyConstraints.FreezeAll;
             }
             else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1.5f)
             {
-                rb.useGravity = false;
                 if (!IsJumping)
                 {
                     transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
@@ -107,7 +104,6 @@ public class Enemy : MonoBehaviour
 
         if (IsAction && IsBuildBridge)
         {
-            rb.useGravity = false;
             if (!BuildFinish)
             {
                 transform.LookAt(actionTargetPos.position);
@@ -122,7 +118,6 @@ public class Enemy : MonoBehaviour
                 this.tag = "Bridge";
                 this.gameObject.layer = 0;
                 BuildFinish = true;
-                rb.constraints = RigidbodyConstraints.FreezeAll;
             }
         }
     }
@@ -143,7 +138,6 @@ public class Enemy : MonoBehaviour
         this.tag = "Stair";
         this.gameObject.layer = 0;
         PileUpFinish = true;
-        rb.constraints = RigidbodyConstraints.FreezeAll;
     }
 
     public void CancelAction()
@@ -155,8 +149,6 @@ public class Enemy : MonoBehaviour
         IsJumping = false;
         PileUpFinish = false;
         BuildFinish = false;
-        rb.useGravity = true;
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
         IsFollow = true;
         this.tag = "Enemy";
         this.gameObject.layer = 7;
@@ -170,7 +162,6 @@ public class Enemy : MonoBehaviour
 
     public void JumpToEndPoint(Vector3 actionEndPos)
     {
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
         transform.DOJump(actionEndPos, 0.5f, 1, 0.5f);
     }
 }
