@@ -13,11 +13,15 @@ public class ActionArea : MonoBehaviour
     [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
     [SerializeField] private Text NeedNumDisplay = null;
     public int PayedCost = 0;
+    [SerializeField] private GameObject blockingWall = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (blockingWall != null)
+        {
+            blockingWall.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -36,5 +40,11 @@ public class ActionArea : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         PayedCost = 0;
+        blockingActivate();
+    }
+
+    private void blockingActivate()
+    {
+        blockingWall.SetActive(true);
     }
 }

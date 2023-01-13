@@ -5,8 +5,8 @@ using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField, Header("移動速度")] private float speed = 2f;
-    [SerializeField, Header("重力の値")] private float gravSpeed = 1f;
+    [SerializeField, Header("基礎移動速度")] private float defaultSpeed = 1f;
+    private float speed = 1f;
     public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
     [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
     private bool CanAction = false; //アクションを行える状態なのか
@@ -29,7 +29,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        SetSpeed();
         SetEnemyNum();
+        
         if (CanAction)
         {
             UpdateNotice();
@@ -57,14 +59,35 @@ public class PlayerController : MonoBehaviour
             //Playerの座標を計算
             Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
             //移動した方向にPlayerの向きを変更する
-            transform.LookAt(direction);
-            rb.velocity = (new Vector3(x,0,z) * speed + Vector3.down * gravSpeed);
+            transform.LookAt(SetLookDirection(x, z));
+            rb.velocity = (new Vector3(x,0,z) * speed);
+
+            for (int i = 0; i < followingEnemy.Count; i++)
+            {
+                followingEnemy[i].transform.localRotation = this.transform.localRotation;
+            }
         }
 
         if (IsActionCharging && !IsEnemyMoving)
         {
             StartCoroutine(EnemyMoveToTargetArea());
             IsEnemyMoving = true;
+        }
+    }
+
+    private void SetSpeed()
+    {
+        if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
+        {
+            speed = defaultSpeed - 0.1f;
+        }
+        else if (followingEnemy.Count == 4 || followingEnemy.Count == 5)
+        {
+            speed = defaultSpeed - 0.2f;
+        }
+        else if (followingEnemy.Count == 6 || followingEnemy.Count == 7 || followingEnemy.Count == 8)
+        {
+            speed = defaultSpeed - 0.3f;
         }
     }
 
@@ -77,6 +100,13 @@ public class PlayerController : MonoBehaviour
             followingEnemy[i].actionNum = actionNum;
             actionNum++;
         }
+    }
+
+    private Vector3 SetLookDirection(float x, float z)
+    {
+        Vector3 lookDirection = transform.position + new Vector3(-z,0,x) * speed;
+
+        return lookDirection;
     }
     
     //Colliderになにかが当たったら
@@ -391,5 +421,6 @@ public class PlayerController : MonoBehaviour
         }
         InAction = false;
         IsActionConfirm = false;
+        rb.useGravity = true;
     }
 }

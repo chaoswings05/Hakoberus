@@ -40,11 +40,12 @@ public class Enemy : MonoBehaviour
             BoneDestroyPos = bone.boneDestroyPos;
             bone.gameObject.layer = 7;
             IsBoneDestroy = true; //家に向かう
+            IsFollow = false;
         }
 
         if (!IsAction && !IsBoneDestroy)
         {
-            if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.5f)
+            if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
             {
                 IsFollow = false;
             }
