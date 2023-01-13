@@ -27,16 +27,14 @@ public class PlayerController : MonoBehaviour
     private bool CrossBridgeFinish = false;
     [SerializeField] private GaugeController gaugeController = null;
 
-    void Update()
+    void Start()
     {
         SetSpeed();
         SetEnemyNum();
-        
-        if (CanAction)
-        {
-            UpdateNotice();
-        }
+    }
 
+    void Update()
+    {
         if (IsActionConfirm && CheckIsEnemyActionFinish())
         {
             InAction = true;
@@ -88,6 +86,10 @@ public class PlayerController : MonoBehaviour
         else if (followingEnemy.Count == 6 || followingEnemy.Count == 7 || followingEnemy.Count == 8)
         {
             speed = defaultSpeed - 0.3f;
+        }
+        else
+        {
+            speed = defaultSpeed;
         }
     }
 
@@ -147,6 +149,8 @@ public class PlayerController : MonoBehaviour
             {
                 followingEnemy[0].bone = other.gameObject.GetComponent<Bone>();
                 followingEnemy.RemoveAt(0);
+                SetSpeed();
+                SetEnemyNum();
             }
         }
 
@@ -163,11 +167,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "ActionPoint")
-        {
-            other.gameObject.GetComponent<ActionArea>().PayedCost = UpdateNotice();
-        }
-
         //CanAction状態でアクションボタンを長押しする場合
         if (Input.GetButton("DS4x") || Input.GetKey(KeyCode.Space))
         {
@@ -228,7 +227,6 @@ public class PlayerController : MonoBehaviour
             if (!IsActionConfirm)
             {
                 actionCost = 0;
-                other.gameObject.GetComponent<ActionArea>().PayedCost = 0;
                 foreach (Enemy obj in followingEnemy)
                 {
                     obj.CancelAction();

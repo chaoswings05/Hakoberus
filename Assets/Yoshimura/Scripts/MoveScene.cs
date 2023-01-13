@@ -7,7 +7,7 @@ public class MoveScene : MonoBehaviour
 {
     void Update()
     {
-        if (Input.GetButtonDown("DS4x"))
+        if (Input.GetButtonDown("DS4x") || Input.GetMouseButtonDown(0))
         {
             OnClickStartButton();
         }

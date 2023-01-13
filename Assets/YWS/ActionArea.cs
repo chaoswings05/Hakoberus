@@ -11,8 +11,6 @@ public class ActionArea : MonoBehaviour
     public bool IsPileUp = false;
     public bool IsBuildBridge = false;
     [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
-    [SerializeField] private Text NeedNumDisplay = null;
-    public int PayedCost = 0;
     [SerializeField] private GameObject blockingWall = null;
 
     // Start is called before the first frame update
@@ -27,24 +25,18 @@ public class ActionArea : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        NeedNumDisplay.text = PayedCost.ToString() + " / " + needNum.ToString();
+        
     }
 
     public void ActionFinish()
     {
-        StartCoroutine(ResetPayedCost());
+        StartCoroutine(blockingActivate());
     }
 
-    private IEnumerator ResetPayedCost()
+    private IEnumerator blockingActivate()
     {
         yield return new WaitForSeconds(0.5f);
 
-        PayedCost = 0;
-        blockingActivate();
-    }
-
-    private void blockingActivate()
-    {
         blockingWall.SetActive(true);
     }
 }
