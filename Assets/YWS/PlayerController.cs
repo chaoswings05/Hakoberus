@@ -57,13 +57,8 @@ public class PlayerController : MonoBehaviour
             //Playerの座標を計算
             Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
             //移動した方向にPlayerの向きを変更する
-            transform.LookAt(SetLookDirection(x, z));
+            transform.LookAt(direction);
             rb.velocity = (new Vector3(x,0,z) * speed);
-
-            for (int i = 0; i < followingEnemy.Count; i++)
-            {
-                followingEnemy[i].transform.localRotation = this.transform.localRotation;
-            }
         }
 
         if (IsActionCharging && !IsEnemyMoving)
@@ -283,7 +278,7 @@ public class PlayerController : MonoBehaviour
             {
                 IsClimbing = true;
                 transform.position = actionPos.position - new Vector3(0,0,0.3f);
-                transform.rotation = Quaternion.Euler(0,-90,90);
+                transform.rotation = Quaternion.Euler(-90,0,0);
             }
         }
 
@@ -291,7 +286,7 @@ public class PlayerController : MonoBehaviour
         {
             transform.position += Vector3.up * 0.1f;
 
-            if (1.5f - transform.position.y <= 0.1f)
+            if (actionEndPos.position.y - transform.position.y <= 0.1f)
             {
                 IsClimbing = false;
                 ClimbFinish = true;
@@ -303,7 +298,7 @@ public class PlayerController : MonoBehaviour
         {
             transform.position += transform.forward * 0.1f;
 
-            if (1.1f - transform.localPosition.z <= 0.1f)
+            if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
             {
                 StartCoroutine(EnemyJumpToEndPoint());
                 ClimbFinish = false;
@@ -420,5 +415,6 @@ public class PlayerController : MonoBehaviour
         InAction = false;
         IsActionConfirm = false;
         rb.useGravity = true;
+        transform.rotation = Quaternion.identity;
     }
 }
