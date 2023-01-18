@@ -7,14 +7,11 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField, Header("基礎移動速度")] private float defaultSpeed = 1f;
     private float speed = 1f;
+    [SerializeField, Header("アクション中の移動速度")] private float actionSpeed = 0.1f;
     public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
     [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
     private bool CanAction = false; //アクションを行える状態なのか
-    [SerializeField, Header("アクションの必要時間")] private float actionTime = 3f;
-    private float actionPush = 0f; //アクションボタンを長押した時間
     private int actionCost = 0; //アクションに必要な赤ハコベロスの数
-    private bool InAction = false;
-    private bool IsActionCharging = false;
     private bool IsActionConfirm = false;
     private bool IsEnemyMoving = false;
     private Transform actionPos = null; //赤ハコベロスがアクションを行う場所
@@ -25,7 +22,6 @@ public class PlayerController : MonoBehaviour
     private bool IsBuildBridge = false;
     private bool arrivalCentral = false;
     private bool CrossBridgeFinish = false;
-    [SerializeField] private GaugeController gaugeController = null;
 
     void Start()
     {
@@ -35,9 +31,23 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        //CanAction状態でアクションボタンを押した場合
+        if (Input.GetButtonDown("DS4x") || Input.GetKeyDown(KeyCode.Space))
+        {
+            if (CanAction && !IsActionConfirm)
+            {
+                IsActionConfirm = true;
+            }
+        }
+
+        if (IsActionConfirm && !IsEnemyMoving)
+        {
+            StartCoroutine(EnemyMoveToTargetArea());
+            IsEnemyMoving = true;
+        }
+
         if (IsActionConfirm && CheckIsEnemyActionFinish())
         {
-            InAction = true;
             if (IsPileUp)
             {
                 ClimbUp();
@@ -52,19 +62,13 @@ public class PlayerController : MonoBehaviour
         float z = Input.GetAxisRaw("Vertical");
 
         //Playerの移動
-        if (!InAction)
+        if (!IsActionConfirm)
         {
             //Playerの座標を計算
             Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
             //移動した方向にPlayerの向きを変更する
             transform.LookAt(direction);
             rb.velocity = (new Vector3(x,0,z) * speed);
-        }
-
-        if (IsActionCharging && !IsEnemyMoving)
-        {
-            StartCoroutine(EnemyMoveToTargetArea());
-            IsEnemyMoving = true;
         }
     }
 
@@ -95,15 +99,9 @@ public class PlayerController : MonoBehaviour
         {
             followingEnemy[i].followNum = i;
             followingEnemy[i].actionNum = actionNum;
+            followingEnemy[i].SetFollowPoint();
             actionNum++;
         }
-    }
-
-    private Vector3 SetLookDirection(float x, float z)
-    {
-        Vector3 lookDirection = transform.position + new Vector3(-z,0,x) * speed;
-
-        return lookDirection;
     }
     
     //Colliderになにかが当たったら
@@ -160,84 +158,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        //CanAction状態でアクションボタンを長押しする場合
-        if (Input.GetButton("DS4x") || Input.GetKey(KeyCode.Space))
-        {
-            if (CanAction && !IsActionConfirm)
-            {
-                IsActionCharging = true;
-                // 秒数を数える
-                actionPush += Time.deltaTime;
-                //アクションゲージを出す
-                gaugeController.ShowGauge();
-                gaugeController.DrawGauge(actionPush);
-
-                // 3秒経ったら
-                if (actionPush >= actionTime && !InAction)
-                {
-                    Debug.Log("3秒経過");
-                    IsActionConfirm = true;
-                    //アクションゲージを消す
-                    gaugeController.HideGauge();
-                    gaugeController.DrawGauge(0);
-                }
-            }
-        }
-        //アクションボタンを離した場合
-        else if(!Input.GetButtonUp("DS4x") || !Input.GetKeyUp(KeyCode.Space))
-        {
-            //アクションを開始する前の状態に戻す
-            actionPush = 0;
-            gaugeController.HideGauge();
-            gaugeController.DrawGauge(0);
-            InAction = false;
-            if (!IsActionConfirm)
-            {
-                foreach (Enemy obj in followingEnemy)
-                {
-                    obj.CancelAction();
-                    if (IsActionCharging)
-                    {
-                        obj.WrapToFollowPoint();
-                    }
-                }
-            }
-            IsActionCharging = false;
-            IsEnemyMoving = false;
-        }
-    }
-
     private void OnTriggerExit(Collider other)
     {
         //ActionPointから離れた場合
         if (other.tag == "ActionPoint")
         {
             Debug.Log("範囲内から離れました");
-            //アクションを開始する前の状態に戻す
-            gaugeController.HideGauge();
-            gaugeController.DrawGauge(0);
             CanAction = false;
-            if (!IsActionConfirm)
-            {
-                actionCost = 0;
-                foreach (Enemy obj in followingEnemy)
-                {
-                    obj.CancelAction();
-                    if (IsActionCharging)
-                    {
-                        obj.WrapToFollowPoint();
-                    }
-                    IsPileUp = false;
-                }
-            }
-            else
+            if (IsActionConfirm)
             {
                 other.gameObject.GetComponent<ActionArea>().ActionFinish();
             }
-            IsActionCharging = false;
-            IsEnemyMoving = false;
         }
     }
 
@@ -272,7 +203,7 @@ public class PlayerController : MonoBehaviour
         if (!IsClimbing && !ClimbFinish)
         {
             transform.LookAt(actionPos);
-            transform.position += transform.forward * 0.1f;
+            transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, actionPos.position) <= 0.3f)
             {
@@ -284,7 +215,7 @@ public class PlayerController : MonoBehaviour
 
         if (IsClimbing && !ClimbFinish)
         {
-            transform.position += Vector3.up * 0.1f;
+            transform.position += Vector3.up * actionSpeed;
 
             if (actionEndPos.position.y - transform.position.y <= 0.1f)
             {
@@ -296,7 +227,7 @@ public class PlayerController : MonoBehaviour
 
         if (ClimbFinish)
         {
-            transform.position += transform.forward * 0.1f;
+            transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
             {
@@ -314,7 +245,7 @@ public class PlayerController : MonoBehaviour
         if (!arrivalCentral && !CrossBridgeFinish)
         {
             transform.LookAt(CentralLocation);
-            transform.position += transform.forward * 0.1f;
+            transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
             {
@@ -326,7 +257,7 @@ public class PlayerController : MonoBehaviour
         if (arrivalCentral)
         {
             transform.LookAt(actionEndPos.position);
-            transform.position += transform.forward * 0.1f;
+            transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
             {
@@ -355,24 +286,6 @@ public class PlayerController : MonoBehaviour
         ResetAfterActionFinish();
     }
 
-    private int UpdateNotice()
-    {
-        int PayedCost = 0;
-        for (int i = 0; i < actionCost; i++)
-        {
-            if (IsPileUp && followingEnemy[i].PileUpFinish)
-            {
-                PayedCost++;
-            }
-
-            if (IsBuildBridge && followingEnemy[i].BuildFinish)
-            {
-                PayedCost++;
-            }
-        }
-        return PayedCost;
-    }
-
     private bool CheckIsEnemyActionFinish()
     {
         int finishedNum = 0;
@@ -391,8 +304,6 @@ public class PlayerController : MonoBehaviour
 
         if (finishedNum == actionCost)
         {
-            IsActionCharging = false;
-            IsEnemyMoving = false;
             return true;
         }
         else
@@ -412,8 +323,8 @@ public class PlayerController : MonoBehaviour
             obj.BuildFinish = false;
             obj.IsFollow = false;
         }
-        InAction = false;
         IsActionConfirm = false;
+        IsEnemyMoving = false;
         rb.useGravity = true;
         transform.rotation = Quaternion.identity;
     }

@@ -5,6 +5,7 @@ using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] private GameObject playerObj = null;
     [SerializeField] private GameObject[] followPosArray = new GameObject[5];
     private GameObject followPos = null;
     [SerializeField] private float speed = 0.1f;
@@ -30,9 +31,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        SetFollowPoint();
-
-        //もしBoneになにか入っている場合
+        //骨を加えている状態
         if(bone != null)
         {
             bone.transform.position = transform.position + Vector3.forward * 0.5f;//targetObjectを上にする
@@ -60,6 +59,7 @@ public class Enemy : MonoBehaviour
         {
             transform.LookAt(followPos.transform);
             transform.position += transform.forward * speed;
+            transform.rotation = playerObj.transform.rotation;
         }
         
         //骨を消す場所に行く時
@@ -93,7 +93,7 @@ public class Enemy : MonoBehaviour
                 this.gameObject.layer = 0;
                 PileUpFinish = true;
             }
-            else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1.5f)
+            else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
             {
                 if (!IsJumping)
                 {
@@ -123,7 +123,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void SetFollowPoint()
+    public void SetFollowPoint()
     {
         followPos = followPosArray[followNum];
     }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.48907608, g: 0.613545, b: 0.5947007, a: 1}
+  m_IndirectSpecularColor: {r: 0.48900372, g: 0.61359626, b: 0.5944088, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -238,13 +238,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5143e6b28c32aee4b9fc77953fa32648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerObj: {fileID: 2141385081}
   followPosArray:
   - {fileID: 1527661582}
   - {fileID: 497674827}
   - {fileID: 1822886037}
   - {fileID: 1671896307}
   - {fileID: 1191193660}
-  speed: 0.1
+  speed: 0.05
   followNum: 0
   actionNum: 0
   actionTargetPos: {fileID: 0}
@@ -1039,13 +1040,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5143e6b28c32aee4b9fc77953fa32648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerObj: {fileID: 2141385081}
   followPosArray:
   - {fileID: 1527661582}
   - {fileID: 497674827}
   - {fileID: 1822886037}
   - {fileID: 1671896307}
   - {fileID: 1191193660}
-  speed: 0.1
+  speed: 0.05
   followNum: 0
   actionNum: 0
   actionTargetPos: {fileID: 0}
@@ -1175,12 +1177,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 725956029936698491, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1600925345251872746, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: gaugeController
       value: 
-      objectReference: {fileID: 2010019501}
+      objectReference: {fileID: 0}
     - target: {fileID: 1600925345251872746, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: followingEnemy.Array.data[0]
       value: 
@@ -1199,7 +1201,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2373836605543508411, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2373836605543508411, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1228,6 +1230,10 @@ PrefabInstance:
     - target: {fileID: 2373836605543508411, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+      propertyPath: actionSpeed
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: followingEnemy.Array.size
@@ -1805,21 +1811,10 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
   m_PrefabInstance: {fileID: 1454969294}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 2141385081}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8f47b163472c6944190c510f94eaf179, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2010019501 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1714299650382782276, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
-  m_PrefabInstance: {fileID: 1454969294}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3cdef0f137e9384a8df5fa164bd128d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &2010351564
@@ -2157,6 +2152,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2141385081 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2814506479671277286, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+  m_PrefabInstance: {fileID: 1454969294}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2173797687077866354
 PrefabInstance:
   m_ObjectHideFlags: 0
