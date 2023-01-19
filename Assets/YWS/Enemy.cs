@@ -105,15 +105,16 @@ public class Enemy : MonoBehaviour
 
         if (IsAction && IsBuildBridge)
         {
+            Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
             if (!BuildFinish)
             {
-                transform.LookAt(actionTargetPos.position);
+                transform.LookAt(targetPos);
                 transform.position += transform.forward * speed;
             }
 
-            if (Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
+            if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
             {
-                transform.position = actionTargetPos.position;
+                transform.position = targetPos;
                 transform.rotation = Quaternion.identity;
                 IsBuildBridge = false;
                 this.tag = "Bridge";

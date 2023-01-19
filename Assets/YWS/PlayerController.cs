@@ -174,7 +174,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator EnemyMoveToTargetArea()
     {
-        for (int i = actionCost-1; i > -1; i--)
+        for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
         {
             followingEnemy[i].IsFollow = false;
             followingEnemy[i].IsAction = true;
@@ -277,11 +277,23 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator EnemyJumpToEndPoint()
     {
-        for (int i = 0; i < actionCost; i++)
+        if (IsPileUp)
         {
-            followingEnemy[i].JumpToEndPoint(actionEndPos.position);
-            
-            yield return new WaitForSeconds(1f);
+            for (int i = 0; i < actionCost; i++)
+            {
+                followingEnemy[i].JumpToEndPoint(actionEndPos.position);
+                
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        else if (IsBuildBridge)
+        {
+            for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
+            {
+                followingEnemy[i].JumpToEndPoint(actionEndPos.position);
+                
+                yield return new WaitForSeconds(1f);
+            }
         }
         ResetAfterActionFinish();
     }
@@ -289,7 +301,7 @@ public class PlayerController : MonoBehaviour
     private bool CheckIsEnemyActionFinish()
     {
         int finishedNum = 0;
-        for (int i = 0; i < actionCost; i++)
+        for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
         {
             if (IsPileUp && followingEnemy[i].PileUpFinish)
             {
