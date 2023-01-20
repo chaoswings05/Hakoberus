@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject[] followPosArray = new GameObject[5];
     private GameObject followPos = null;
     [SerializeField] private float speed = 0.1f;
+    [SerializeField] private Animator enemyAnimator = null;
     public int followNum = 0;
     public int actionNum = 0;
     public Transform actionTargetPos = null; //アクションを行う場所
@@ -47,6 +48,7 @@ public class Enemy : MonoBehaviour
             if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
             {
                 IsFollow = false;
+                enemyAnimator.SetBool("IsWalking", false);
             }
             else
             {
@@ -57,6 +59,7 @@ public class Enemy : MonoBehaviour
         //もしPlayerに追従するなら
         if (IsFollow)
         {
+            enemyAnimator.SetBool("IsWalking", true);
             transform.LookAt(followPos.transform);
             transform.position += transform.forward * speed;
             transform.rotation = playerObj.transform.rotation;
@@ -65,6 +68,7 @@ public class Enemy : MonoBehaviour
         //骨を消す場所に行く時
         if(IsBoneDestroy)
         {
+            enemyAnimator.SetBool("IsWalking", true);
             transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
             transform.position += transform.forward * speed;
 
@@ -80,12 +84,14 @@ public class Enemy : MonoBehaviour
         {
             if (!IsJumping)
             {
+                enemyAnimator.SetBool("IsWalking", true);
                 transform.LookAt(actionTargetPos.position);
                 transform.position += transform.forward * speed;
             }
 
             if (!NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
             {
+                enemyAnimator.SetBool("IsWalking", false);
                 transform.position = actionTargetPos.position;
                 transform.rotation = Quaternion.identity;
                 IsPileUp = false;
@@ -95,6 +101,7 @@ public class Enemy : MonoBehaviour
             }
             else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
             {
+                enemyAnimator.SetBool("IsWalking", false);
                 if (!IsJumping)
                 {
                     transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
@@ -108,12 +115,14 @@ public class Enemy : MonoBehaviour
             Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
             if (!BuildFinish)
             {
+                enemyAnimator.SetBool("IsWalking", true);
                 transform.LookAt(targetPos);
                 transform.position += transform.forward * speed;
             }
 
             if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
             {
+                enemyAnimator.SetBool("IsWalking", false);
                 transform.position = targetPos;
                 transform.rotation = Quaternion.identity;
                 IsBuildBridge = false;

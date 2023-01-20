@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Header("アクション中の移動速度")] private float actionSpeed = 0.1f;
     public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
     [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
+    [SerializeField] private Animator playerAnimator = null;
     private bool CanAction = false; //アクションを行える状態なのか
     private int actionCost = 0; //アクションに必要な赤ハコベロスの数
     private bool IsActionConfirm = false;
@@ -37,6 +38,7 @@ public class PlayerController : MonoBehaviour
             if (CanAction && !IsActionConfirm)
             {
                 IsActionConfirm = true;
+                playerAnimator.SetBool("IsWalking", false);
             }
         }
 
@@ -66,15 +68,32 @@ public class PlayerController : MonoBehaviour
         {
             //Playerの座標を計算
             Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
+
+            if (x != 0 || z != 0)
+            {
+                playerAnimator.SetBool("IsWalking", true);
+            }
+            else
+            {
+                playerAnimator.SetBool("IsWalking", false);
+            }
+
             //移動した方向にPlayerの向きを変更する
             transform.LookAt(direction);
             rb.velocity = (new Vector3(x,0,z) * speed);
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            //SetSpeed();
+            speed -= 0.1f;
+            Debug.Log(speed);
         }
     }
 
     private void SetSpeed()
     {
-        if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
+        /*if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
         {
             speed = defaultSpeed - 0.1f;
         }
@@ -85,11 +104,11 @@ public class PlayerController : MonoBehaviour
         else if (followingEnemy.Count == 6 || followingEnemy.Count == 7 || followingEnemy.Count == 8)
         {
             speed = defaultSpeed - 0.3f;
-        }
-        else
-        {
+        }*/
+        //else
+        //{
             speed = defaultSpeed;
-        }
+        //}
     }
 
     private void SetEnemyNum()
@@ -202,6 +221,7 @@ public class PlayerController : MonoBehaviour
         rb.useGravity = false;
         if (!IsClimbing && !ClimbFinish)
         {
+            playerAnimator.SetBool("IsWalking", true);
             transform.LookAt(actionPos);
             transform.position += transform.forward * actionSpeed;
 
@@ -210,23 +230,28 @@ public class PlayerController : MonoBehaviour
                 IsClimbing = true;
                 transform.position = actionPos.position - new Vector3(0,0,0.3f);
                 transform.rotation = Quaternion.Euler(-90,0,0);
+                playerAnimator.SetBool("IsWalking", false);
             }
         }
 
         if (IsClimbing && !ClimbFinish)
         {
+            playerAnimator.SetBool("IsWalking", true);
             transform.position += Vector3.up * actionSpeed;
 
             if (actionEndPos.position.y - transform.position.y <= 0.1f)
             {
                 IsClimbing = false;
                 ClimbFinish = true;
+                transform.position += new Vector3(0,0.1f,0);
                 transform.rotation = Quaternion.identity;
+                playerAnimator.SetBool("IsWalking", false);
             }
         }
 
         if (ClimbFinish)
         {
+            playerAnimator.SetBool("IsWalking", true);
             transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
@@ -234,6 +259,8 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(EnemyJumpToEndPoint());
                 ClimbFinish = false;
                 IsPileUp = false;
+                transform.position = actionEndPos.position;
+                playerAnimator.SetBool("IsWalking", false);
             }
         }
     }

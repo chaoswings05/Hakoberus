@@ -35,7 +35,7 @@ public class ActionArea : MonoBehaviour
 
     private IEnumerator blockingActivate()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.5f);
 
         blockingWall.SetActive(true);
     }
