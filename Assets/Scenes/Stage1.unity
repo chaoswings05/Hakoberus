@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.49828297, g: 0.60640126, b: 0.617968, a: 1}
+  m_IndirectSpecularColor: {r: 0.48901635, g: 0.6135881, b: 0.59445965, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1218,7 +1218,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: defaultSpeed
-      value: 1
+      value: 2.8
       objectReference: {fileID: 0}
     - target: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
       propertyPath: playerAnimator
