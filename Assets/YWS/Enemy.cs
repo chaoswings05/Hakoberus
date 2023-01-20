@@ -42,9 +42,16 @@ public class Enemy : MonoBehaviour
             IsBoneDestroy = true; //家に向かう
             IsFollow = false;
         }
-
+        //骨を消す場所に行く時
+        if(IsBoneDestroy)
+        {
+            BoneDestroy();
+            return;
+        }
+        //アクション中および骨を咥えている状態でない時
         if (!IsAction && !IsBoneDestroy)
         {
+            //プレイヤーから一定距離離れると、追従モードに入る
             if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
             {
                 IsFollow = false;
@@ -55,7 +62,6 @@ public class Enemy : MonoBehaviour
                 IsFollow = true;
             }
         }
-
         //もしPlayerに追従するなら
         if (IsFollow)
         {
@@ -64,78 +70,64 @@ public class Enemy : MonoBehaviour
             transform.position += transform.forward * speed;
             transform.rotation = playerObj.transform.rotation;
         }
-        
-        //骨を消す場所に行く時
-        if(IsBoneDestroy)
-        {
-            enemyAnimator.SetBool("IsWalking", true);
-            transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
-            transform.position += transform.forward * speed;
-
-            if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 1f) //もしBoneDestroyPosの距離が1より小さくなったら
-            {
-                Destroy(bone.gameObject); //骨を消す
-                Destroy(gameObject); //自分を消す
-            }
-            return;
-        }
-
+        //階段を積むアクション
         if (IsAction && IsPileUp)
         {
-            if (!IsJumping)
-            {
-                enemyAnimator.SetBool("IsWalking", true);
-                transform.LookAt(actionTargetPos.position);
-                transform.position += transform.forward * speed;
-            }
-
-            if (!NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
-            {
-                enemyAnimator.SetBool("IsWalking", false);
-                transform.position = actionTargetPos.position;
-                transform.rotation = Quaternion.identity;
-                IsPileUp = false;
-                this.tag = "Stair";
-                this.gameObject.layer = 0;
-                PileUpFinish = true;
-            }
-            else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
-            {
-                enemyAnimator.SetBool("IsWalking", false);
-                if (!IsJumping)
-                {
-                    transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
-                }
-                IsJumping = true;
-            }
+            PileUp();
+            return;
         }
-
+        //橋を掛けるアクション
         if (IsAction && IsBuildBridge)
         {
-            Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
-            if (!BuildFinish)
-            {
-                enemyAnimator.SetBool("IsWalking", true);
-                transform.LookAt(targetPos);
-                transform.position += transform.forward * speed;
-            }
-
-            if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
-            {
-                enemyAnimator.SetBool("IsWalking", false);
-                transform.position = targetPos;
-                transform.rotation = Quaternion.identity;
-                IsBuildBridge = false;
-                this.tag = "Bridge";
-                this.gameObject.layer = 0;
-                BuildFinish = true;
-            }
+            BuildBridge();
+            return;
         }
     }
 
     public void SetFollowPoint()
     {
         followPos = followPosArray[followNum];
+    }
+
+    private void BoneDestroy()
+    {
+        enemyAnimator.SetBool("IsWalking", true);
+        transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
+        transform.position += transform.forward * speed;
+
+        if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 1f) //もしBoneDestroyPosの距離が1より小さくなったら
+        {
+            Destroy(bone.gameObject); //骨を消す
+            Destroy(gameObject); //自分を消す
+        }
+    }
+
+    private void PileUp()
+    {
+        if (!IsJumping)
+        {
+            enemyAnimator.SetBool("IsWalking", true);
+            transform.LookAt(actionTargetPos.position);
+            transform.position += transform.forward * speed;
+        }
+
+        if (!NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            transform.position = actionTargetPos.position;
+            transform.rotation = Quaternion.identity;
+            IsPileUp = false;
+            PileUpFinish = true;
+        }
+        else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            if (!IsJumping)
+            {
+                transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
+            }
+            IsJumping = true;
+        }
     }
 
     private void JumpFinish()
@@ -146,29 +138,27 @@ public class Enemy : MonoBehaviour
         transform.rotation = Quaternion.identity;
         IsPileUp = false;
         IsJumping = false;
-        this.tag = "Stair";
-        this.gameObject.layer = 0;
         PileUpFinish = true;
     }
 
-    public void CancelAction()
+    private void BuildBridge()
     {
-        IsAction = false;
-        IsPileUp = false;
-        IsBuildBridge = false;
-        NeedJump = false;
-        IsJumping = false;
-        PileUpFinish = false;
-        BuildFinish = false;
-        IsFollow = true;
-        this.tag = "Enemy";
-        this.gameObject.layer = 7;
-    }
+        Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
+        if (!BuildFinish)
+        {
+            enemyAnimator.SetBool("IsWalking", true);
+            transform.LookAt(targetPos);
+            transform.position += transform.forward * speed;
+        }
 
-    public void WrapToFollowPoint()
-    {
-        transform.position = followPos.transform.position;
-        transform.rotation = Quaternion.identity;
+        if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            transform.position = targetPos;
+            transform.rotation = Quaternion.identity;
+            IsBuildBridge = false;
+            BuildFinish = true;
+        }
     }
 
     public void JumpToEndPoint(Vector3 actionEndPos)

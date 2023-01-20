@@ -21,8 +21,8 @@ public class PlayerController : MonoBehaviour
     private bool IsClimbing = false;
     private bool ClimbFinish = false;
     private bool IsBuildBridge = false;
+    private int crossedNum = 0;
     private bool arrivalCentral = false;
-    private bool CrossBridgeFinish = false;
 
     void Start()
     {
@@ -82,18 +82,11 @@ public class PlayerController : MonoBehaviour
             transform.LookAt(direction);
             rb.velocity = (new Vector3(x,0,z) * speed);
         }
-
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            //SetSpeed();
-            speed -= 0.1f;
-            Debug.Log(speed);
-        }
     }
 
     private void SetSpeed()
     {
-        /*if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
+        if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
         {
             speed = defaultSpeed - 0.1f;
         }
@@ -104,11 +97,13 @@ public class PlayerController : MonoBehaviour
         else if (followingEnemy.Count == 6 || followingEnemy.Count == 7 || followingEnemy.Count == 8)
         {
             speed = defaultSpeed - 0.3f;
-        }*/
-        //else
-        //{
+        }
+        else
+        {
             speed = defaultSpeed;
-        //}
+        }
+
+        Debug.Log(speed);
     }
 
     private void SetEnemyNum()
@@ -267,17 +262,22 @@ public class PlayerController : MonoBehaviour
 
     private void CrossBridge()
     {
-        Vector3 CentralLocation = new Vector3(actionPos.position.x, this.transform.position.y, actionPos.position.z);
+        Vector3 CentralLocation = new Vector3(actionPos.position.x, this.transform.position.y, actionPos.position.z + 0.75f * crossedNum);
 
-        if (!arrivalCentral && !CrossBridgeFinish)
+        if (!arrivalCentral)
         {
             transform.LookAt(CentralLocation);
             transform.position += transform.forward * actionSpeed;
 
             if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
             {
-                arrivalCentral = true;
                 transform.position = CentralLocation;
+                crossedNum++;
+                if (crossedNum == actionCost)
+                {
+                    arrivalCentral = true;
+                    crossedNum = 0;
+                }
             }
         }
 
@@ -289,16 +289,10 @@ public class PlayerController : MonoBehaviour
             if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
             {
                 transform.position = actionEndPos.position;
+                StartCoroutine(EnemyJumpToEndPoint());
                 arrivalCentral = false;
-                CrossBridgeFinish = true;
+                IsBuildBridge = false;
             }
-        }
-
-        if (CrossBridgeFinish)
-        {
-            StartCoroutine(EnemyJumpToEndPoint());
-            IsBuildBridge = false;
-            CrossBridgeFinish = false;
         }
     }
 
@@ -355,12 +349,11 @@ public class PlayerController : MonoBehaviour
     {
         foreach(Enemy obj in followingEnemy)
         {
-            obj.tag = "Enemy";
-            obj.gameObject.layer = 7;
             obj.IsAction = false;
             obj.PileUpFinish = false;
             obj.BuildFinish = false;
             obj.IsFollow = false;
+            obj.transform.rotation = Quaternion.identity;
         }
         IsActionConfirm = false;
         IsEnemyMoving = false;

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ActionArea : MonoBehaviour
 {
@@ -11,7 +10,9 @@ public class ActionArea : MonoBehaviour
     public bool IsPileUp = false;
     public bool IsBuildBridge = false;
     [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
+    [SerializeField] private bool NeedBlock = false;
     [SerializeField] private GameObject blockingWall = null;
+    [SerializeField] private float WaitTime = 0.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -30,12 +31,15 @@ public class ActionArea : MonoBehaviour
 
     public void ActionFinish()
     {
-        StartCoroutine(blockingActivate());
+        if (NeedBlock)
+        {
+            StartCoroutine(blockingActivate());
+        }
     }
 
     private IEnumerator blockingActivate()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(WaitTime);
 
         blockingWall.SetActive(true);
     }
