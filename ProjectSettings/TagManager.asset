@@ -8,6 +8,7 @@ TagManager:
   - Bone
   - Enemy
   - Goal
+  - Sub
   layers:
   - Default
   - TransparentFX
