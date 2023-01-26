@@ -46,7 +46,7 @@ public class Goal : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
 
-        // Debug.Log("hit");
+         Debug.Log("hit");
 
 
         if (counter >= Goalcount)
