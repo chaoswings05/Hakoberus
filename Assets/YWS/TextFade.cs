@@ -18,7 +18,7 @@ public class TextFade : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetButtonDown("DS4x") || Input.GetMouseButtonDown(0))
         {
             fade.Kill();
         }

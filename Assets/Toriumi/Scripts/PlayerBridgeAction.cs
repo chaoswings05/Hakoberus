@@ -51,29 +51,29 @@ public class PlayerBridgeAction : MonoBehaviour
 
     }
 
-    // ƒgƒŠƒK[‚ğì‚Á‚Ä–³—‚â‚èƒAƒNƒVƒ‡ƒ“ƒ|ƒCƒ“ƒgì‚Á‚Ä‚é
+    // ãƒˆãƒªã‚¬ãƒ¼ã‚’ä½œã£ã¦ç„¡ç†ã‚„ã‚Šã‚¢ã‚¯ã‚·ãƒ§ãƒ³ãƒã‚¤ãƒ³ãƒˆä½œã£ã¦ã‚‹
     public void OnTriggerStay(Collider other)
     {
-        Debug.Log("“ü‚Á‚½");
+        Debug.Log("å…¥ã£ãŸ");
 
         if (Input.GetKey(KeyCode.Space))
         {
 
             Debug.Log(actionPush);
 
-            // •b”‚ğ”‚¦‚é
+            // ç§’æ•°ã‚’æ•°ãˆã‚‹
             actionPush += Time.deltaTime;
 
-            // 3•bŒo‚Á‚½‚ç
+            // 3ç§’çµŒã£ãŸã‚‰
             if (actionPush >= push1)
             {
-                Debug.Log("3•bŒo‰ß");
+                Debug.Log("3ç§’çµŒé");
                 start = true;
 
             }
             else
             {
-                Debug.Log("3•b‚È‚¢AƒeƒLƒXƒg•\¦");
+                Debug.Log("3ç§’ãªã„ã€ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤º");
             }
 
         }

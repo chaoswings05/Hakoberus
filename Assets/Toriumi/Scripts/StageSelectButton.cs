@@ -6,13 +6,13 @@ using UnityEngine.UI;
 
 public class StageSelectButton : MonoBehaviour
 {
-    [SerializeField, Header("ƒXƒe[ƒWƒCƒ[ƒW")]
+    [SerializeField, Header("ã‚¹ãƒ†ãƒ¼ã‚¸ã‚¤ãƒ¡ãƒ¼ã‚¸")]
     GameObject i_stage1;
 
     [SerializeField]
     GameObject i_stage2;
 
-    [SerializeField, Header("ƒJ[ƒ\ƒ‹ƒCƒ[ƒW")]
+    [SerializeField, Header("ã‚«ãƒ¼ã‚½ãƒ«ã‚¤ãƒ¡ãƒ¼ã‚¸")]
     GameObject i_cursor1;
 
     [SerializeField]
@@ -28,7 +28,7 @@ public class StageSelectButton : MonoBehaviour
         i_cursor2.SetActive(false);
 
         _button = GameObject.Find("Stage1Button").GetComponent<Button>();
-        // Å‰‚©‚çƒ{ƒ^ƒ“‚ğ‘I‘ğ‚µ‚Ä‚¢‚éó‘Ô
+        // æœ€åˆã‹ã‚‰ãƒœã‚¿ãƒ³ã‚’é¸æŠã—ã¦ã„ã‚‹çŠ¶æ…‹
         _button.Select();
     }
 
@@ -38,7 +38,7 @@ public class StageSelectButton : MonoBehaviour
         
     }
 
-    // ƒ}ƒEƒXƒJ[ƒ\ƒ‹‚ğƒ{ƒ^ƒ“‚Ìã‚É’u‚¢‚½‚ç‰æ‘œ1•\¦
+    // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«ã‚’ãƒœã‚¿ãƒ³ã®ä¸Šã«ç½®ã„ãŸã‚‰ç”»åƒ1è¡¨ç¤º
     public void OnEnterStage1()
     {
         i_stage1.SetActive(true);
@@ -46,7 +46,7 @@ public class StageSelectButton : MonoBehaviour
 
     }
 
-    // ƒ}ƒEƒXƒJ[ƒ\ƒ‹‚ğƒ{ƒ^ƒ“‚Ìã‚É’u‚¢‚½‚ç‰æ‘œ2•\¦
+    // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«ã‚’ãƒœã‚¿ãƒ³ã®ä¸Šã«ç½®ã„ãŸã‚‰ç”»åƒ2è¡¨ç¤º
     public void OnEnterStage2()
     {
         i_stage2.SetActive(true);
@@ -54,32 +54,32 @@ public class StageSelectButton : MonoBehaviour
 
     }
 
-    // ƒ}ƒEƒXƒJ[ƒ\ƒ‹‚ğƒ{ƒ^ƒ“‚©‚ç—£‚µ‚½‚ç‰æ‘œ1‚ğ”ñ•\¦
+    // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«ã‚’ãƒœã‚¿ãƒ³ã‹ã‚‰é›¢ã—ãŸã‚‰ç”»åƒ1ã‚’éè¡¨ç¤º
     public void OnExitStage1()
     {
         i_stage1.SetActive(false);
         i_cursor1.SetActive(false);
     }
 
-    // ƒ}ƒEƒXƒJ[ƒ\ƒ‹‚ğƒ{ƒ^ƒ“‚©‚ç—£‚µ‚½‚ç‰æ‘œ2‚ğ”ñ•\¦
+    // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«ã‚’ãƒœã‚¿ãƒ³ã‹ã‚‰é›¢ã—ãŸã‚‰ç”»åƒ2ã‚’éè¡¨ç¤º
     public void OnExitStage2()
     {
         i_stage2.SetActive(false);
         i_cursor2.SetActive(false);
     }
 
-    // ƒXƒe[ƒW1‚Ö
+    // ã‚¹ãƒ†ãƒ¼ã‚¸1ã¸
     public void OnClickStage1()
     {
-        Debug.Log("ƒXƒe[ƒW1‚Ö");
-        // SceneManager.LoadScene("Stage1");
+        Debug.Log("ã‚¹ãƒ†ãƒ¼ã‚¸1ã¸");
+        SceneManager.LoadScene("Stage1");
     }
 
-    // ƒXƒe[ƒW2‚Ö
+    // ã‚¹ãƒ†ãƒ¼ã‚¸2ã¸
     public void OnClickStage2()
     {
-        Debug.Log("ƒXƒe[ƒW2‚Ö");
-        // SceneManager.LoadScene("Stage2");
+        Debug.Log("ã‚¹ãƒ†ãƒ¼ã‚¸2ã¸");
+        SceneManager.LoadScene("Stage2");
     }
 
 }

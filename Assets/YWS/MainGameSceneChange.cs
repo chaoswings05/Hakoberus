@@ -9,12 +9,14 @@ public class MainGameSceneChange : MonoBehaviour
     {
         if (other.tag == "Player" && other.gameObject.GetComponent<PlayerController>().followingEnemy.Count == 0)
         {
+            SoundManager.Instance.PlaySE(1);
             GameClear();
         }     
     }
 
     private void GameClear()
     {
+        SoundManager.Instance.StopBGM();
         SceneManager.LoadScene("GameClear");
     }
 }
