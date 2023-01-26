@@ -15,6 +15,6 @@ public class GameClearSceneChange : MonoBehaviour
 
     public void ReturnTitle()
     {
-        SceneManager.LoadScene("Title");
+        SceneManager.LoadScene("TitleScene");
     }
 }
