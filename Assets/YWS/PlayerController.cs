@@ -1,167 +1,364 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
+using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField, Header("移動速度")] private float speed = 2f;
-    [SerializeField, Header("回転速度")] private float rotSpeed = 30f;
-    [SerializeField, Header("跳躍力")] private float jumpPower = 40f;
-    [SerializeField, Header("重力の値")] private float gravSpeed = 1f;
-    //今現在追従している赤ハコベロスのリスト
-    public List<Enemy> followingEnemy = new List<Enemy>();
-    //ピクミンが積み上げる場所の取得
-    private Transform pileUpPos = null;
-    //Rigidbodyの取得
-    [SerializeField] private Rigidbody rb = null;
-    private bool CanAction = false;
-    private float actionPush = 0f;
-    [SerializeField, Header("アクションの必要時間")] private float actionTime = 3f;
-    private int actionCost = 0;
-    [SerializeField] private float enemyY = 0.5f;
-    [SerializeField] private float enemyZ = 0.75f;
-    private bool InAction = false;
-    
+    [SerializeField, Header("基礎移動速度")] private float defaultSpeed = 1f;
+    private float speed = 1f;
+    [SerializeField, Header("アクション中の移動速度")] private float actionSpeed = 0.1f;
+    public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
+    [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
+    [SerializeField] private Animator playerAnimator = null;
+    private bool CanAction = false; //アクションを行える状態なのか
+    private int actionCost = 0; //アクションに必要な赤ハコベロスの数
+    private bool IsActionConfirm = false;
+    private bool IsEnemyMoving = false;
+    private Transform actionPos = null; //赤ハコベロスがアクションを行う場所
+    private Transform actionEndPos = null;
+    private bool IsPileUp = false;
+    private bool IsClimbing = false;
+    private bool ClimbFinish = false;
+    private bool IsBuildBridge = false;
+    private int crossedNum = 0;
+    private bool arrivalCentral = false;
+
     void Start()
     {
-        
+        SetSpeed();
+        SetEnemyNum();
     }
 
     void Update()
     {
+        //CanAction状態でアクションボタンを押した場合
+        if (Input.GetButtonDown("DS4x") || Input.GetKeyDown(KeyCode.Space))
+        {
+            if (CanAction && !IsActionConfirm)
+            {
+                IsActionConfirm = true;
+                playerAnimator.SetBool("IsWalking", false);
+            }
+        }
+
+        if (IsActionConfirm && !IsEnemyMoving)
+        {
+            StartCoroutine(EnemyMoveToTargetArea());
+            IsEnemyMoving = true;
+        }
+
+        if (IsActionConfirm && CheckIsEnemyActionFinish())
+        {
+            if (IsPileUp)
+            {
+                ClimbUp();
+            }
+            if (IsBuildBridge)
+            {
+                CrossBridge();
+            }
+        }
+
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
-        //Spaceキーを押したらジャンプする
-        /*if(Input.GetKeyDown(KeyCode.Space))
+        //Playerの移動
+        if (!IsActionConfirm)
         {
-            //ジャンプ
-            rb.AddForce(new Vector3(0, jumpPower, 0), ForceMode.Impulse);
-        }*/
+            //Playerの座標を計算
+            Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
 
-//Playerの移動-------------
-        //Playerの座標を計算
-        Vector3 direction = transform.position + new Vector3(x,0,z) * speed;
-        //移動下方向にPlayerの向きを変更する
-        transform.LookAt(direction);
-        rb.velocity = (new Vector3(x,0,z) * speed + Vector3.down * gravSpeed);
-//-------------
+            if (x != 0 || z != 0)
+            {
+                playerAnimator.SetBool("IsWalking", true);
+            }
+            else
+            {
+                playerAnimator.SetBool("IsWalking", false);
+            }
+
+            //移動した方向にPlayerの向きを変更する
+            transform.LookAt(direction);
+            rb.velocity = (new Vector3(x,0,z) * speed);
+        }
+    }
+
+    private void SetSpeed()
+    {
+        if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
+        {
+            speed = defaultSpeed - 0.1f;
+        }
+        else if (followingEnemy.Count == 4 || followingEnemy.Count == 5)
+        {
+            speed = defaultSpeed - 0.2f;
+        }
+        else if (followingEnemy.Count == 6 || followingEnemy.Count == 7 || followingEnemy.Count == 8)
+        {
+            speed = defaultSpeed - 0.3f;
+        }
+        else
+        {
+            speed = defaultSpeed;
+        }
+
+        Debug.Log(speed);
+    }
+
+    private void SetEnemyNum()
+    {
+        int actionNum = 0;
+        for (int i = followingEnemy.Count-1; i > -1; i--)
+        {
+            followingEnemy[i].followNum = i;
+            followingEnemy[i].actionNum = actionNum;
+            followingEnemy[i].SetFollowPoint();
+            actionNum++;
+        }
     }
     
-    //Colliderになにか当たったら
+    //Colliderになにかが当たったら
     private void OnTriggerEnter(Collider other)
     {
         //PlayerがActionPointに入ったら
         if(other.tag == "ActionPoint")
         {
             Debug.Log("範囲内に入りました");
-            CanAction = true;
+            //アクションを行う目標地点とアクションを行うための赤ハコベロスの数を取得
+            actionPos = other.gameObject.GetComponent<ActionArea>().targetPoint;
+            actionCost = other.gameObject.GetComponent<ActionArea>().needNum;
             if (other.gameObject.GetComponent<ActionArea>().IsPileUp)
             {
-                pileUpPos = other.gameObject.GetComponent<ActionArea>().targetPoint;
-                actionCost = other.gameObject.GetComponent<ActionArea>().needNum;
+                IsPileUp = true;
+            }
+            if (other.gameObject.GetComponent<ActionArea>().IsBuildBridge)
+            {
+                IsBuildBridge = true;
+            }
+            actionEndPos = other.gameObject.GetComponent<ActionArea>().endPoint;
+
+            //アクションに必要な分の赤ハコベロスを連れている時だけアクションを行う許可を出す
+            if (followingEnemy.Count >= actionCost)
+            {
+                CanAction = true;
             }
         }
 
+        //Playerが骨と接触した場合
         if (other.tag == "Bone")
         {
             Debug.Log("骨を拾いました");
+            SoundManager.Instance.PlaySE(0);
+            //処理が重複しないように骨のタグを変更
             other.tag = "Untagged";
+            //骨のデータを一番目の赤ハコベロスに渡し、その赤ハコベロスをリストから削除
             if (followingEnemy.Count > 0)
             {
                 followingEnemy[0].bone = other.gameObject.GetComponent<Bone>();
                 followingEnemy.RemoveAt(0);
+                SetSpeed();
+                SetEnemyNum();
             }
         }
 
+        //Playerが赤ハコベロスを連れていない状態でゴールに到達した場合
         if (other.tag == "Goal" && followingEnemy.Count == 0)
         {
-            //Goalしたときにログに出す
+            //Goalしたログを出す
             Debug.Log("Goal");
            
-            //キャラクターを非表示にする処理
+            //Playerを非表示にする
             this.gameObject.SetActive(false);
-        }
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (Input.GetButton("DS4x") || Input.GetKey(KeyCode.Space))
-        {
-            if (CanAction)
-            {
-                // 秒数を数える
-                actionPush += Time.deltaTime;
-
-                // 3秒経ったら
-                if (actionPush >= actionTime && !InAction)
-                {
-                    Debug.Log("3秒経過");
-                    StartCoroutine(EnemyHighMove());
-                }
-            }
-        }
-        else if(!Input.GetButtonUp("DS4x") || !Input.GetKeyUp(KeyCode.Space))
-        {
-            actionPush = 0;
-            InAction = false;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
+        //ActionPointから離れた場合
         if (other.tag == "ActionPoint")
         {
             Debug.Log("範囲内から離れました");
             CanAction = false;
-            actionCost = 0;
+            if (IsActionConfirm)
+            {
+                other.gameObject.GetComponent<ActionArea>().ActionFinish();
+            }
         }
     }
 
-    IEnumerator EnemyHighMove()
+    private IEnumerator EnemyMoveToTargetArea()
     {
-        InAction = true;
-        // 簡単な表記にするために
-        //Vector3 firstPos = followingEnemy[0].transform.position;
-        Vector3 h_brockPos = pileUpPos.transform.position;
-
-        // エネミーの移動
-        //followingEnemy[0].GetComponent<Enemy>().follow = false;
-        //followingEnemy[1].GetComponent<Enemy>().follow = false;
-        //followingEnemy[0].transform.position = new Vector3(h_brockPos.x, h_brockPos.y, h_brockPos.z - enemyZ);
-        //followingEnemy[1].transform.position = new Vector3(firstPos.x, firstPos.y + enemyY, firstPos.z);
-        for (int i = 0; i < actionCost; i++)
+        for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
         {
-            followingEnemy[i].GetComponent<Enemy>().follow = false;
-            followingEnemy[i].transform.position = new Vector3(h_brockPos.x, h_brockPos.y + enemyY * i, h_brockPos.z - enemyZ);
+            followingEnemy[i].IsFollow = false;
+            followingEnemy[i].IsAction = true;
+            if (IsPileUp)
+            {
+                followingEnemy[i].actionTargetPos = actionPos;
+                followingEnemy[i].IsPileUp = true;
+                if (actionCost-1 > i)
+                {
+                    followingEnemy[i].NeedJump = true;
+                }
+            }
+            if (IsBuildBridge)
+            {
+                followingEnemy[i].actionTargetPos = actionPos;
+                followingEnemy[i].IsBuildBridge = true;
+            }
+            
+            yield return new WaitForSeconds(1f);
         }
-        Debug.Log("アクション");
-        followingEnemy.RemoveRange(0,actionCost);
-
-        yield return new WaitForSeconds(3f);
-
-        // Plyerと赤ハコベロスの障害物上に移動
-        this.transform.position = new Vector3(h_brockPos.x, h_brockPos.y + 1f, h_brockPos.z);
-        foreach (Enemy obj in followingEnemy)
-        {
-            obj.transform.position = new Vector3(h_brockPos.x, h_brockPos.y + 1f, h_brockPos.z);
-        }
-
-        //yield return new WaitForSeconds(1f);
-
-        // 外したコンポーネントを再度ON
-        /*foreach (GameObject obj in nav)
-        {
-            obj.GetComponent<EnemyFollowScript>().enabled = true;
-            obj.GetComponent<NavMeshAgent>().enabled = true;
-
-        }*/
     }
-    
-    [SerializeField] Camera mainCamera = null;
-    private void LateUpdate()
+
+    private void ClimbUp()
     {
-        mainCamera.transform.LookAt(transform.position);
+        rb.useGravity = false;
+        if (!IsClimbing && !ClimbFinish)
+        {
+            playerAnimator.SetBool("IsWalking", true);
+            transform.LookAt(actionPos);
+            transform.position += transform.forward * actionSpeed;
+
+            if (Vector3.Distance(transform.position, actionPos.position) <= 0.3f)
+            {
+                IsClimbing = true;
+                transform.position = actionPos.position - new Vector3(0,0,0.3f);
+                transform.rotation = Quaternion.Euler(-90,0,0);
+                playerAnimator.SetBool("IsWalking", false);
+            }
+        }
+
+        if (IsClimbing && !ClimbFinish)
+        {
+            playerAnimator.SetBool("IsWalking", true);
+            transform.position += Vector3.up * actionSpeed;
+
+            if (actionEndPos.position.y - transform.position.y <= 0.1f)
+            {
+                IsClimbing = false;
+                ClimbFinish = true;
+                transform.position += new Vector3(0,0.1f,0);
+                transform.rotation = Quaternion.identity;
+                playerAnimator.SetBool("IsWalking", false);
+            }
+        }
+
+        if (ClimbFinish)
+        {
+            playerAnimator.SetBool("IsWalking", true);
+            transform.position += transform.forward * actionSpeed;
+
+            if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
+            {
+                StartCoroutine(EnemyJumpToEndPoint());
+                ClimbFinish = false;
+                IsPileUp = false;
+                transform.position = actionEndPos.position;
+                playerAnimator.SetBool("IsWalking", false);
+            }
+        }
+    }
+
+    private void CrossBridge()
+    {
+        Vector3 CentralLocation = new Vector3(actionPos.position.x, this.transform.position.y, actionPos.position.z + 0.75f * crossedNum);
+
+        if (!arrivalCentral)
+        {
+            transform.LookAt(CentralLocation);
+            transform.position += transform.forward * actionSpeed;
+
+            if (Vector3.Distance(transform.position, CentralLocation) <= 0.1f)
+            {
+                transform.position = CentralLocation;
+                crossedNum++;
+                if (crossedNum == actionCost)
+                {
+                    arrivalCentral = true;
+                    crossedNum = 0;
+                }
+            }
+        }
+
+        if (arrivalCentral)
+        {
+            transform.LookAt(actionEndPos.position);
+            transform.position += transform.forward * actionSpeed;
+
+            if (Vector3.Distance(transform.position, actionEndPos.position) <= 0.1f)
+            {
+                transform.position = actionEndPos.position;
+                StartCoroutine(EnemyJumpToEndPoint());
+                arrivalCentral = false;
+                IsBuildBridge = false;
+            }
+        }
+    }
+
+    private IEnumerator EnemyJumpToEndPoint()
+    {
+        if (IsPileUp)
+        {
+            for (int i = 0; i < actionCost; i++)
+            {
+                followingEnemy[i].JumpToEndPoint(actionEndPos.position);
+                
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        else if (IsBuildBridge)
+        {
+            for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
+            {
+                followingEnemy[i].JumpToEndPoint(actionEndPos.position);
+                
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        ResetAfterActionFinish();
+    }
+
+    private bool CheckIsEnemyActionFinish()
+    {
+        int finishedNum = 0;
+        for (int i = followingEnemy.Count-1; i > followingEnemy.Count-actionCost-1; i--)
+        {
+            if (IsPileUp && followingEnemy[i].PileUpFinish)
+            {
+                finishedNum++;
+            }
+
+            if (IsBuildBridge && followingEnemy[i].BuildFinish)
+            {
+                finishedNum++;
+            }
+        }
+
+        if (finishedNum == actionCost)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void ResetAfterActionFinish()
+    {
+        foreach(Enemy obj in followingEnemy)
+        {
+            obj.IsAction = false;
+            obj.PileUpFinish = false;
+            obj.BuildFinish = false;
+            obj.IsFollow = false;
+            obj.transform.rotation = Quaternion.identity;
+        }
+        IsActionConfirm = false;
+        IsEnemyMoving = false;
+        rb.useGravity = true;
+        transform.rotation = Quaternion.identity;
     }
 }

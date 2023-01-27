@@ -1,81 +1,168 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
-    // NavMeshAgentの取得
-    [SerializeField] NavMeshAgent agent = null;
-    //Controllerスクリプトの追加
-    public PlayerController controller = null;
-    //PlayerGathPosの位置情報の取得
-    public Transform PlayerGathPos = null;
-    //ピクミンを積み上げる場所の取得
-    public Transform pileUpPos = null;
-    //ActionPointスクリプトの取得
-    public ActionPoint actionPoint = null;
-    //PileUpPointスクリプトの取得
-    public PileUpPoint pileUpPoint = null;
-    //BoneControllerスクリプトの取得
+    [SerializeField] private GameObject playerObj = null;
+    [SerializeField] private GameObject[] followPosArray = new GameObject[5];
+    private GameObject followPos = null;
+    [SerializeField] private float speed = 0.1f;
+    [SerializeField] private Animator enemyAnimator = null;
+    public int followNum = 0;
+    public int actionNum = 0;
+    public Transform actionTargetPos = null; //アクションを行う場所
     public Bone bone = null;
-    //骨を持って行く場所
-    public Transform BoneDestroyPos = null;
-    //Playerに追従するかどうか
-    public bool follow = true;
-    //持っている骨を壊すかどうか
-    public bool BoneDestroy = false;
+    public Transform BoneDestroyPos = null; //骨を持っていく場所
+    public bool IsFollow = true; //プレイヤーに追随するかどうか
+    public bool IsBoneDestroy = false; //骨を破壊するアクションを行うかどうか
+    public bool IsAction = false; //アクション中かどうか
+    public bool IsPileUp = false; //階段積み上げアクションを行うかどうか
+    public bool NeedJump = false; //アクションを行う時、ジャンプをする必要があるかどうか
+    private bool IsJumping = false;
+    public bool PileUpFinish = false;
+    public bool IsBuildBridge = false;
+    public bool BuildFinish = false;
 
-    private void Start()
+    void Start()
     {
-
+        
     }
 
-    private void Update()
+    void Update()
     {
-        //もしPlayerに追従するなら
-        if (follow)
-        {
-            agent.SetDestination(PlayerGathPos.position); //目的地をPlayerGathPosにする
-        }
-
-        //骨を消す場所に行く時
-        if(BoneDestroy)
-        {
-            agent.SetDestination(BoneDestroyPos.transform.position);//骨を消す場所に行く
-            
-            if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 0.3f)//もしBoneDestroyPosの距離が0.75より小さくなったら
-            {
-                Destroy(bone.gameObject);//骨を消す
-                Destroy(gameObject);//自分を消す
-            }
-            return;
-        }
-
-        //もしBoneになにか入っている場合
+        //骨を加えている状態
         if(bone != null)
         {
-            //agent.stoppingDistance = 0;
-            //agent.SetDestination(bone.transform.position);//目的地をBoneにする
-            //if (Vector3.Distance(transform.position, bone.transform.position) <= 0.4f)//もしBoneの距離が0.75より小さくなったら
-            //{
-                bone.transform.position = transform.position + Vector3.forward * 0.9f;//targetObjectを上にする
-                bone.transform.SetParent(transform);//Boneとピクミンをくっつける
-                Destroy(bone.GetComponent<Rigidbody>());//BoneのRigidbodyをはずす
-                BoneDestroyPos = bone.boneDestroyPos;
-                BoneDestroy = true;//家に向かう
-            //}
+            bone.transform.position = transform.position + Vector3.forward * 0.5f;//targetObjectを上にする
+            bone.transform.SetParent(transform); //Boneと自分をくっつける
+            BoneDestroyPos = bone.boneDestroyPos;
+            bone.gameObject.layer = 7;
+            IsBoneDestroy = true; //家に向かう
+            IsFollow = false;
         }
-
-        //もし積み上げるなら(ピクミンはHomePosには戻らない)
-        if(pileUpPoint != null)
+        //骨を消す場所に行く時
+        if(IsBoneDestroy)
         {
-            agent.SetDestination(pileUpPos.position);//ピクミンの目的地を積み上げる場所にする
-            if(Vector3.Distance(transform.position, pileUpPos.transform.position) <= 0.2f)//もしピクミンがくっついたら
+            BoneDestroy();
+            return;
+        }
+        //アクション中および骨を咥えている状態でない時
+        if (!IsAction && !IsBoneDestroy)
+        {
+            //プレイヤーから一定距離離れると、追従モードに入る
+            if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
             {
-                agent.speed = 0f;
-                //pileUpPoint.transform.SetParent(transform);//pileUpPointとピクミンをくっつける
+                IsFollow = false;
+                enemyAnimator.SetBool("IsWalking", false);
+            }
+            else
+            {
+                IsFollow = true;
             }
         }
+        //もしPlayerに追従するなら
+        if (IsFollow)
+        {
+            enemyAnimator.SetBool("IsWalking", true);
+            transform.LookAt(followPos.transform);
+            transform.position += transform.forward * speed;
+            transform.rotation = playerObj.transform.rotation;
+        }
+        //階段を積むアクション
+        if (IsAction && IsPileUp)
+        {
+            PileUp();
+            return;
+        }
+        //橋を掛けるアクション
+        if (IsAction && IsBuildBridge)
+        {
+            BuildBridge();
+            return;
+        }
+    }
+
+    public void SetFollowPoint()
+    {
+        followPos = followPosArray[followNum];
+    }
+
+    private void BoneDestroy()
+    {
+        enemyAnimator.SetBool("IsWalking", true);
+        transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
+        transform.position += transform.forward * speed;
+
+        if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 1f) //もしBoneDestroyPosの距離が1より小さくなったら
+        {
+            Destroy(bone.gameObject); //骨を消す
+            Destroy(gameObject); //自分を消す
+        }
+    }
+
+    private void PileUp()
+    {
+        if (!IsJumping)
+        {
+            enemyAnimator.SetBool("IsWalking", true);
+            transform.LookAt(actionTargetPos.position);
+            transform.position += transform.forward * speed;
+        }
+
+        if (!NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            transform.position = actionTargetPos.position;
+            transform.rotation = Quaternion.identity;
+            IsPileUp = false;
+            PileUpFinish = true;
+        }
+        else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            if (!IsJumping)
+            {
+                transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
+            }
+            IsJumping = true;
+        }
+    }
+
+    private void JumpFinish()
+    {
+        NeedJump = false;
+        transform.position = actionTargetPos.position;
+        transform.position += new Vector3(0,actionNum * 0.5f,0);
+        transform.rotation = Quaternion.identity;
+        IsPileUp = false;
+        IsJumping = false;
+        PileUpFinish = true;
+    }
+
+    private void BuildBridge()
+    {
+        Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
+        if (!BuildFinish)
+        {
+            enemyAnimator.SetBool("IsWalking", true);
+            transform.LookAt(targetPos);
+            transform.position += transform.forward * speed;
+        }
+
+        if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
+        {
+            enemyAnimator.SetBool("IsWalking", false);
+            transform.position = targetPos;
+            transform.rotation = Quaternion.identity;
+            IsBuildBridge = false;
+            BuildFinish = true;
+        }
+    }
+
+    public void JumpToEndPoint(Vector3 actionEndPos)
+    {
+        transform.DOJump(actionEndPos, 0.5f, 1, 0.5f);
     }
 }
