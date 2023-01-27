@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     private GameObject followPos = null;
     [SerializeField] private float speed = 0.1f;
     [SerializeField] private Animator enemyAnimator = null;
+    private int isWalkingID = Animator.StringToHash("IsWalking");
     public int followNum = 0;
     public int actionNum = 0;
     public Transform actionTargetPos = null; //アクションを行う場所
@@ -18,17 +19,10 @@ public class Enemy : MonoBehaviour
     public bool IsFollow = true; //プレイヤーに追随するかどうか
     public bool IsBoneDestroy = false; //骨を破壊するアクションを行うかどうか
     public bool IsAction = false; //アクション中かどうか
-    public bool IsPileUp = false; //階段積み上げアクションを行うかどうか
     public bool NeedJump = false; //アクションを行う時、ジャンプをする必要があるかどうか
     private bool IsJumping = false;
     public bool PileUpFinish = false;
-    public bool IsBuildBridge = false;
     public bool BuildFinish = false;
-
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
@@ -55,7 +49,7 @@ public class Enemy : MonoBehaviour
             if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
             {
                 IsFollow = false;
-                enemyAnimator.SetBool("IsWalking", false);
+                enemyAnimator.SetBool(isWalkingID, false);
             }
             else
             {
@@ -65,19 +59,19 @@ public class Enemy : MonoBehaviour
         //もしPlayerに追従するなら
         if (IsFollow)
         {
-            enemyAnimator.SetBool("IsWalking", true);
+            enemyAnimator.SetBool(isWalkingID, true);
             transform.LookAt(followPos.transform);
             transform.position += transform.forward * speed;
             transform.rotation = playerObj.transform.rotation;
         }
         //階段を積むアクション
-        if (IsAction && IsPileUp)
+        if (IsAction && GameDirector.Instance.AP.IsPileUp)
         {
             PileUp();
             return;
         }
         //橋を掛けるアクション
-        if (IsAction && IsBuildBridge)
+        if (IsAction && GameDirector.Instance.AP.IsBuildBridge)
         {
             BuildBridge();
             return;
@@ -91,7 +85,7 @@ public class Enemy : MonoBehaviour
 
     private void BoneDestroy()
     {
-        enemyAnimator.SetBool("IsWalking", true);
+        enemyAnimator.SetBool(isWalkingID, true);
         transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
         transform.position += transform.forward * speed;
 
@@ -104,27 +98,27 @@ public class Enemy : MonoBehaviour
 
     private void PileUp()
     {
-        if (!IsJumping)
+        if (!PileUpFinish && !IsJumping)
         {
-            enemyAnimator.SetBool("IsWalking", true);
+            enemyAnimator.SetBool(isWalkingID, true);
             transform.LookAt(actionTargetPos.position);
             transform.position += transform.forward * speed;
         }
 
-        if (!NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 0.1f)
+        if (!PileUpFinish && !NeedJump && Vector3.SqrMagnitude(transform.position - actionTargetPos.position) <= 0.01f)
         {
-            enemyAnimator.SetBool("IsWalking", false);
+            enemyAnimator.SetBool(isWalkingID, false);
             transform.position = actionTargetPos.position;
             transform.rotation = Quaternion.identity;
-            IsPileUp = false;
             PileUpFinish = true;
         }
-        else if (NeedJump && Vector3.Distance(transform.position, actionTargetPos.position) <= 1f)
+        else if (!IsJumping && NeedJump && Vector3.SqrMagnitude(transform.position - actionTargetPos.position) <= 1f)
         {
-            enemyAnimator.SetBool("IsWalking", false);
+            enemyAnimator.SetBool(isWalkingID, false);
+            actionTargetPos = GameDirector.Instance.AP.actionPoint[actionNum];
             if (!IsJumping)
             {
-                transform.DOJump(actionTargetPos.position + new Vector3(0,actionNum * 0.5f,0), 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
+                transform.DOJump(actionTargetPos.position, 0.5f, 1, 0.5f).OnComplete(() => JumpFinish());
             }
             IsJumping = true;
         }
@@ -134,29 +128,25 @@ public class Enemy : MonoBehaviour
     {
         NeedJump = false;
         transform.position = actionTargetPos.position;
-        transform.position += new Vector3(0,actionNum * 0.5f,0);
         transform.rotation = Quaternion.identity;
-        IsPileUp = false;
         IsJumping = false;
         PileUpFinish = true;
     }
 
     private void BuildBridge()
     {
-        Vector3 targetPos = actionTargetPos.position + new Vector3(0,0,0.75f * actionNum);
         if (!BuildFinish)
         {
-            enemyAnimator.SetBool("IsWalking", true);
-            transform.LookAt(targetPos);
+            enemyAnimator.SetBool(isWalkingID, true);
+            transform.LookAt(actionTargetPos);
             transform.position += transform.forward * speed;
         }
 
-        if (Vector3.Distance(transform.position, targetPos) <= 0.1f)
+        if (Vector3.SqrMagnitude(transform.position - actionTargetPos.position) <= 0.01f)
         {
-            enemyAnimator.SetBool("IsWalking", false);
-            transform.position = targetPos;
+            enemyAnimator.SetBool(isWalkingID, false);
+            transform.position = actionTargetPos.position;
             transform.rotation = Quaternion.identity;
-            IsBuildBridge = false;
             BuildFinish = true;
         }
     }

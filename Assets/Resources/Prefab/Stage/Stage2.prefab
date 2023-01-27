@@ -6289,6 +6289,10 @@ PrefabInstance:
       propertyPath: IsBuildBridge
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3613575372096239579, guid: c9bf4023a71e9b74380d1e84a3392c36, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.15
+      objectReference: {fileID: 0}
     - target: {fileID: 4388639603676056804, guid: c9bf4023a71e9b74380d1e84a3392c36, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -6343,7 +6347,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5359443643630979196, guid: c9bf4023a71e9b74380d1e84a3392c36, type: 3}
       propertyPath: m_Text
-      value: '1
+      value: 'x1
 
 '
       objectReference: {fileID: 0}
@@ -9130,7 +9134,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5359443643630979196, guid: c9bf4023a71e9b74380d1e84a3392c36, type: 3}
       propertyPath: m_Text
-      value: 1
+      value: x1
       objectReference: {fileID: 0}
     - target: {fileID: 8165835898197606131, guid: c9bf4023a71e9b74380d1e84a3392c36, type: 3}
       propertyPath: m_Name

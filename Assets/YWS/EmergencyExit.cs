@@ -10,7 +10,7 @@ public class EmergencyExit : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Q) && Input.GetKeyDown(KeyCode.P))
         {
-            SceneManager.LoadScene("Title");
+            SceneManager.LoadScene("TitleScene");
         }
     }
 }
