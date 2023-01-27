@@ -149,6 +149,7 @@ public class PlayerController : MonoBehaviour
         if (other.tag == "Bone")
         {
             Debug.Log("骨を拾いました");
+            SoundManager.Instance.PlaySE(0);
             //処理が重複しないように骨のタグを変更
             other.tag = "Untagged";
             //骨のデータを一番目の赤ハコベロスに渡し、その赤ハコベロスをリストから削除
