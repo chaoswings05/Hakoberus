@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class FloorFall : MonoBehaviour
 {
-    [SerializeField, Header("æ‚ê‚éÔƒnƒRƒxƒƒX‚ÌãŒÀ")] int fallcount = 0;
+    [SerializeField, Header("ï¿½ï¿½ï¿½ï¿½Ôƒnï¿½Rï¿½xï¿½ï¿½ï¿½Xï¿½Ìï¿½ï¿½")] int fallcount = 0;
     [SerializeField] private PlayerController playerObj = null;
-    [SerializeField, Header("ƒvƒŒƒCƒ„[‚Ì•œŠˆ’n“_")] private Transform respawnPoint = null;
+    [SerializeField, Header("ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ì•ï¿½ï¿½ï¿½ï¿½nï¿½_")] private Transform respawnPoint = null;
     [SerializeField] private Rigidbody rb = null;
     private Vector3 thisPos = Vector3.zero;
-    [SerializeField, Header("‚±‚Ì•ö‰ó°‚ª•œŠˆ‚·‚é‚Ü‚Å‚ÌŽžŠÔ")] private float respawnCountDownTime = 0f;
+    [SerializeField, Header("ï¿½ï¿½ï¿½Ì•ï¿½ï¿½ó°‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚Å‚ÌŽï¿½ï¿½ï¿½")] private float respawnCountDownTime = 0f;
     private float elapsedTime = 0f;
     private bool IsRespawnCountDownStart = false;
 
@@ -39,9 +39,9 @@ public class FloorFall : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        if (other.CompareTag("Player") && playerObj.followingEnemy.Count > fallcount)
+        if (other.gameObject.CompareTag("Player") && playerObj.followingEnemy.Count > fallcount)
         {
             rb.isKinematic = false;
             IsRespawnCountDownStart = true;
