@@ -111,6 +111,10 @@ public class PlayerController : MonoBehaviour
             transform.LookAt(direction);
             rb.velocity = new Vector3(x, rb.velocity.y, z);
         }
+        else
+        {
+            rb.velocity = new Vector3(0,rb.velocity.y,0);
+        }
     }
 
     /// <summary>
