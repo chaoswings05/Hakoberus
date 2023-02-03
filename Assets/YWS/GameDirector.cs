@@ -15,7 +15,7 @@ public class GameDirector : MonoBehaviour
 
                 if (instance == null)
                 {
-                    Debug.LogError("SoundManager Instance Error");
+                    Debug.LogError("GameDirector Instance Error");
                 }
             }
 

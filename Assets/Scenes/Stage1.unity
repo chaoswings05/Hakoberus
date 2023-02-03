@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.5063629, g: 0.5992325, b: 0.62263745, a: 1}
+  m_IndirectSpecularColor: {r: 0.523838, g: 0.5817759, b: 0.60490763, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -164,6 +164,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 2141385082}
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
@@ -1019,6 +1023,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+--- !u!114 &1454969295 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+  m_PrefabInstance: {fileID: 1454969294}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141385081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f47b163472c6944190c510f94eaf179, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1477521065 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8511994175168554230, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
@@ -1039,6 +1054,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 2141385082}
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
@@ -1323,7 +1342,7 @@ GameObject:
   - component: {fileID: 2043789334}
   - component: {fileID: 2043789335}
   m_Layer: 0
-  m_Name: BGMPlayer
+  m_Name: GameDirector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1428,6 +1447,11 @@ Transform:
 --- !u!1 &2141385081 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2814506479671277286, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+  m_PrefabInstance: {fileID: 1454969294}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2141385082 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2373836605543508411, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
   m_PrefabInstance: {fileID: 1454969294}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2173797687077866354
@@ -1813,6 +1837,10 @@ PrefabInstance:
       propertyPath: respawnPoint
       value: 
       objectReference: {fileID: 2173797687077866355}
+    - target: {fileID: 7145222383365919968, guid: 9b756e89ae4d69741bb737912f8f57c1, type: 3}
+      propertyPath: respawnTarget
+      value: 
+      objectReference: {fileID: 1454969295}
     - target: {fileID: 7201149046393776847, guid: 9b756e89ae4d69741bb737912f8f57c1, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -1901,6 +1929,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8725543335972943638, guid: 9b756e89ae4d69741bb737912f8f57c1, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1454969295}
     - target: {fileID: 8767255282007320133, guid: 9b756e89ae4d69741bb737912f8f57c1, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0

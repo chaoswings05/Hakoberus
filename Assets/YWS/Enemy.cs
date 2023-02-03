@@ -5,24 +5,48 @@ using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private GameObject playerObj = null;
-    [SerializeField] private GameObject[] followPosArray = new GameObject[5];
-    private GameObject followPos = null;
-    [SerializeField] private float speed = 0.1f;
+    [SerializeField, Header("移動速度")] private float speed = 0.05f;
+
+    #region プレイヤー追従関連
+    [SerializeField, Header("追従するプレイヤー")] private Transform playerObj = null;
+    [SerializeField, Header("赤ハコベロスの陣形の位置リスト")] private GameObject[] followPosArray = new GameObject[5];
+    [Header("この赤ハコベロスの追従番号")] public int followNum = 0;
+    [Header("この赤ハコベロスのアクション番号")] public int actionNum = 0;
+    private GameObject followPos = null; //この赤ハコベロスの配属するポイント
+    [Header("プレイヤーに追随するかどうか")] public bool IsFollow = true;
+    #endregion
+
+    #region アニメーション関連
     [SerializeField] private Animator enemyAnimator = null;
     private int isWalkingID = Animator.StringToHash("IsWalking");
-    public int followNum = 0;
-    public int actionNum = 0;
-    public Transform actionTargetPos = null; //アクションを行う場所
-    public Bone bone = null;
-    public Transform BoneDestroyPos = null; //骨を持っていく場所
-    public bool IsFollow = true; //プレイヤーに追随するかどうか
-    public bool IsBoneDestroy = false; //骨を破壊するアクションを行うかどうか
-    public bool IsAction = false; //アクション中かどうか
-    public bool NeedJump = false; //アクションを行う時、ジャンプをする必要があるかどうか
-    private bool IsJumping = false;
-    public bool PileUpFinish = false;
-    public bool BuildFinish = false;
+    #endregion
+
+    #region 骨関連
+    [Header("保持している骨オブジェクト")] public Bone bone = null;
+    [Header("骨を持っていく場所")] public Transform BoneDestroyPos = null;
+    [Header("骨を破壊するアクションを行うかどうか")] public bool IsBoneDestroy = false;
+    #endregion
+
+    #region アクション関連
+    [Header("アクションを行う場所")] public Transform actionTargetPos = null;
+    [Header("アクション中かどうか")] public bool IsAction = false;
+    public bool IsWalkingAction = false;
+    //階段積み上げアクション
+    [Header("ジャンプをする必要があるかどうか")]public bool NeedJump = false;
+    private bool IsJumping = false; //ジャンプ中かどうか
+    //橋掛けアクション
+    [Header("積み上げアクションが終了したかどうか")] public bool PileUpFinish = false;
+    [Header("橋掛けアクションが終了したかどうか")] public bool BuildFinish = false;
+    //階段登りアクション
+    public bool IsClimbUp = false;
+    private bool IsClimbing = false; //階段を登り始めたかどうか
+    private bool ClimbFinish = false; //階段を登り切ったかどうか
+    public bool IsWaiting = false; //階段を登るアクションが完全に終了したかどうか
+    //橋を渡るアクション
+    public bool IsCrossBridge = false;
+    private int crossNum = 0; //何体目の赤ハコベロスの上を渡っているか
+    public bool CrossFinish = false; //橋を完全に渡り切ったかどうか
+    #endregion
 
     void Update()
     {
@@ -43,7 +67,7 @@ public class Enemy : MonoBehaviour
             return;
         }
         //アクション中および骨を咥えている状態でない時
-        if (!IsAction && !IsBoneDestroy)
+        if (!IsAction && !IsWalkingAction && !IsBoneDestroy)
         {
             //プレイヤーから一定距離離れると、追従モードに入る
             if (Vector3.Distance(transform.position, followPos.transform.position) <= 0.1f)
@@ -74,6 +98,16 @@ public class Enemy : MonoBehaviour
         if (IsAction && GameDirector.Instance.AP.IsBuildBridge)
         {
             BuildBridge();
+            return;
+        }
+        if (IsWalkingAction && IsClimbUp)
+        {
+            ClimbUp();
+            return;
+        }
+        if (IsWalkingAction && IsCrossBridge)
+        {
+            CrossBridge();
             return;
         }
     }
@@ -109,7 +143,7 @@ public class Enemy : MonoBehaviour
         {
             enemyAnimator.SetBool(isWalkingID, false);
             transform.position = actionTargetPos.position;
-            transform.rotation = Quaternion.identity;
+            transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
             PileUpFinish = true;
         }
         else if (!IsJumping && NeedJump && Vector3.SqrMagnitude(transform.position - actionTargetPos.position) <= 1f)
@@ -128,7 +162,7 @@ public class Enemy : MonoBehaviour
     {
         NeedJump = false;
         transform.position = actionTargetPos.position;
-        transform.rotation = Quaternion.identity;
+        transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
         IsJumping = false;
         PileUpFinish = true;
     }
@@ -146,7 +180,7 @@ public class Enemy : MonoBehaviour
         {
             enemyAnimator.SetBool(isWalkingID, false);
             transform.position = actionTargetPos.position;
-            transform.rotation = Quaternion.identity;
+            transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
             BuildFinish = true;
         }
     }
@@ -154,5 +188,75 @@ public class Enemy : MonoBehaviour
     public void JumpToEndPoint(Vector3 actionEndPos)
     {
         transform.DOJump(actionEndPos, 0.5f, 1, 0.5f);
+    }
+
+    private void ClimbUp()
+    {
+        if (!IsClimbing && !ClimbFinish && !IsWaiting)
+        {
+            enemyAnimator.SetBool(isWalkingID, true);
+            transform.LookAt(GameDirector.Instance.AP.walkPoint[0]);
+            transform.position += transform.forward * speed;
+
+            if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[0].position) <= 0.01f)
+            {
+                IsClimbing = true;
+                transform.position = GameDirector.Instance.AP.walkPoint[0].position;
+                transform.rotation = Quaternion.Euler(-90,GameDirector.Instance.AP.forward,0);
+                enemyAnimator.SetBool(isWalkingID, false);
+            }
+        }
+        else if (IsClimbing && !ClimbFinish)
+        {
+            enemyAnimator.SetBool(isWalkingID, true);
+            transform.position += Vector3.up * speed;
+
+            if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[1].position) <= 0.01f)
+            {
+                IsClimbing = false;
+                ClimbFinish = true;
+                transform.position = GameDirector.Instance.AP.walkPoint[1].position;
+                transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
+                enemyAnimator.SetBool(isWalkingID, false);
+            }
+        }
+        else if (ClimbFinish)
+        {
+            enemyAnimator.SetBool(isWalkingID, true);
+            transform.position += transform.forward * speed;
+
+            if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[2].position) <= 0.01f)
+            {
+                ClimbFinish = false;
+                transform.position = GameDirector.Instance.AP.walkPoint[2].position;
+                enemyAnimator.SetBool(isWalkingID, false);
+                IsWaiting = true;
+            }
+        }
+    }
+
+    private void CrossBridge()
+    {
+        if (!CrossFinish)
+        {
+            transform.LookAt(GameDirector.Instance.AP.walkPoint[crossNum]);
+            transform.position += transform.forward * speed;
+
+            if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[crossNum].position) <= 0.01f)
+            {
+                transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
+                if (crossNum == GameDirector.Instance.AP.needNum)
+                {
+                    transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
+                    enemyAnimator.SetBool(isWalkingID, false);
+                    CrossFinish = true;
+                    crossNum = 0;
+                }
+                else
+                {
+                    crossNum++;
+                }
+            }
+        }
     }
 }

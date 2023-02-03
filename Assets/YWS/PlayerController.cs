@@ -4,21 +4,34 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField, Header("基礎移動速度")] private float defaultSpeed = 1f;
-    private float speed = 1f;
-    [SerializeField, Header("アクション中の移動速度")] private float actionSpeed = 0.1f;
-    public List<Enemy> followingEnemy = new List<Enemy>(); //プレイヤーが連れている赤ハコベロスのリスト
+    [Header("プレイヤーが連れている赤ハコベロスのリスト")] public List<Enemy> followingEnemy = new List<Enemy>();
     [SerializeField] private Rigidbody rb = null; //PlayerのRigidbodyを取得
+
+    #region 移動速度関連
+    [SerializeField, Header("基礎移動速度")] private float defaultSpeed = 2.8f;
+    private float speed = 2.8f; //実際の移動速度
+    [SerializeField, Header("アクション中の移動速度")] private float actionSpeed = 0.05f;
+    #endregion
+
+    #region アニメーション関連
     [SerializeField] private Animator playerAnimator = null;
     private int isWalkingID = Animator.StringToHash("IsWalking");
+    #endregion
+
+    #region アクション関連
     private bool CanAction = false; //アクションを行える状態なのか
-    private bool IsActionConfirm = false;
-    private bool IsEnemyMoving = false;
-    private bool IsWaiting = false;
-    private bool IsClimbing = false;
-    private bool ClimbFinish = false;
-    private int crossNum = 0;
-    private bool CrossFinish = false;
+    private bool IsActionConfirm = false; //アクションを実行するかどうか
+    private bool IsEnemyMoving = false; //赤ハコベロスがアクションを開始したかどうか
+    private bool IsWalkingAction = false;
+    [SerializeField]private bool IsEnemyLeft = false;
+    //階段登りアクション
+    private bool IsClimbing = false; //階段を登り始めたかどうか
+    private bool ClimbFinish = false; //階段を登り切ったかどうか
+    private bool IsWaiting = false; //階段を登るアクションが完全に終了したかどうか
+    //橋を渡るアクション
+    private int crossNum = 0; //何体目の赤ハコベロスの上を渡っているか
+    private bool CrossFinish = false; //橋を完全に渡り切ったかどうか
+    #endregion
 
     void Start()
     {
@@ -46,6 +59,13 @@ public class PlayerController : MonoBehaviour
 
         if (IsActionConfirm && CheckIsEnemyActionFinish())
         {
+            if (!IsWalkingAction && followingEnemy.Count > GameDirector.Instance.AP.needNum)
+            {
+                StartCoroutine(LeftEnemyFollowPlayer());
+                IsWalkingAction = true;
+                return;
+            }
+
             if (GameDirector.Instance.AP.IsPileUp)
             {
                 ClimbUp();
@@ -54,6 +74,12 @@ public class PlayerController : MonoBehaviour
             {
                 CrossBridge();
             }
+        }
+
+        if (IsEnemyLeft && CheckIsEnemyWalkingActionFinish())
+        {
+            StartCoroutine(EnemyJumpToEndPoint());
+            IsEnemyLeft = false;
         }
 
         float x = Input.GetAxisRaw("Horizontal");
@@ -99,7 +125,7 @@ public class PlayerController : MonoBehaviour
             speed = defaultSpeed;
         }
 
-        Debug.Log(speed);
+        //Debug.Log(speed);
     }
 
     private void SetEnemyNum()
@@ -120,7 +146,7 @@ public class PlayerController : MonoBehaviour
         //PlayerがActionPointに入ったら
         if(other.CompareTag("ActionPoint"))
         {
-            Debug.Log("範囲内に入りました");
+            //Debug.Log("範囲内に入りました");
             GameDirector.Instance.AP = other.gameObject.GetComponent<ActionArea>();
 
             //アクションに必要な分の赤ハコベロスを連れている時だけアクションを行う許可を出す
@@ -133,7 +159,7 @@ public class PlayerController : MonoBehaviour
         //Playerが骨と接触した場合
         if (other.CompareTag("Bone"))
         {
-            Debug.Log("骨を拾いました");
+            //Debug.Log("骨を拾いました");
             SoundManager.Instance.PlaySE(0);
             //処理が重複しないように骨のタグを変更
             other.tag = "Untagged";
@@ -151,7 +177,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Goal") && followingEnemy.Count == 0)
         {
             //Goalしたログを出す
-            Debug.Log("Goal");
+            //Debug.Log("Goal");
            
             //Playerを非表示にする
             this.gameObject.SetActive(false);
@@ -163,7 +189,7 @@ public class PlayerController : MonoBehaviour
         //ActionPointから離れた場合
         if (other.CompareTag("ActionPoint"))
         {
-            Debug.Log("範囲内から離れました");
+            //Debug.Log("範囲内から離れました");
             CanAction = false;
         }
     }
@@ -171,6 +197,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator EnemyMoveToTargetArea()
     {
         var cachedWait = new WaitForSeconds(1f);
+        int standbyNum = 0;
         for (int i = followingEnemy.Count-1; i > followingEnemy.Count-GameDirector.Instance.AP.needNum-1; i--)
         {
             followingEnemy[i].IsFollow = false;
@@ -178,7 +205,7 @@ public class PlayerController : MonoBehaviour
             if (GameDirector.Instance.AP.IsPileUp)
             {
                 followingEnemy[i].actionTargetPos = GameDirector.Instance.AP.actionPoint[0];
-                if (GameDirector.Instance.AP.needNum-1 > i)
+                if (GameDirector.Instance.AP.needNum > 1 && standbyNum >= 1)
                 {
                     followingEnemy[i].NeedJump = true;
                 }
@@ -187,8 +214,30 @@ public class PlayerController : MonoBehaviour
             {
                 followingEnemy[i].actionTargetPos = GameDirector.Instance.AP.actionPoint[followingEnemy[i].actionNum];
             }
+            standbyNum++;
             
             yield return cachedWait;
+        }
+    }
+
+    private IEnumerator LeftEnemyFollowPlayer()
+    {
+        var cachedWait = new WaitForSeconds(0.1f);
+
+        for (int i = 0; i < followingEnemy.Count-GameDirector.Instance.AP.needNum; i++)
+        {
+            followingEnemy[i].IsFollow = false;
+            followingEnemy[i].IsWalkingAction = true;
+            if (GameDirector.Instance.AP.IsPileUp)
+            {
+                followingEnemy[i].IsClimbUp = true;
+            }
+            else if (GameDirector.Instance.AP.IsBuildBridge)
+            {
+                followingEnemy[i].IsCrossBridge = true;
+            }
+
+            yield return null;
         }
     }
 
@@ -205,7 +254,7 @@ public class PlayerController : MonoBehaviour
             {
                 IsClimbing = true;
                 transform.position = GameDirector.Instance.AP.walkPoint[0].position;
-                transform.rotation = Quaternion.Euler(-90,0,0);
+                transform.rotation = Quaternion.Euler(-90,GameDirector.Instance.AP.forward,0);
                 playerAnimator.SetBool(isWalkingID, false);
             }
         }
@@ -219,7 +268,7 @@ public class PlayerController : MonoBehaviour
                 IsClimbing = false;
                 ClimbFinish = true;
                 transform.position = GameDirector.Instance.AP.walkPoint[1].position;
-                transform.rotation = Quaternion.identity;
+                transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
                 playerAnimator.SetBool(isWalkingID, false);
             }
         }
@@ -230,7 +279,14 @@ public class PlayerController : MonoBehaviour
 
             if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[2].position) <= 0.01f)
             {
-                StartCoroutine(EnemyJumpToEndPoint());
+                if (followingEnemy.Count > GameDirector.Instance.AP.needNum)
+                {
+                    IsEnemyLeft = true;
+                }
+                else
+                {
+                    StartCoroutine(EnemyJumpToEndPoint());
+                }
                 ClimbFinish = false;
                 transform.position = GameDirector.Instance.AP.walkPoint[2].position;
                 playerAnimator.SetBool(isWalkingID, false);
@@ -252,8 +308,16 @@ public class PlayerController : MonoBehaviour
                 transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
                 if (crossNum == GameDirector.Instance.AP.needNum)
                 {
+                    if (followingEnemy.Count > GameDirector.Instance.AP.needNum)
+                    {
+                        IsEnemyLeft = true;
+                    }
+                    else
+                    {
+                        StartCoroutine(EnemyJumpToEndPoint());
+                    }
                     transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
-                    StartCoroutine(EnemyJumpToEndPoint());
+                    playerAnimator.SetBool(isWalkingID, false);
                     CrossFinish = true;
                     crossNum = 0;
                 }
@@ -268,9 +332,10 @@ public class PlayerController : MonoBehaviour
     private IEnumerator EnemyJumpToEndPoint()
     {
         var cachedWait = new WaitForSeconds(1f);
+
         if (GameDirector.Instance.AP.IsPileUp)
         {
-            for (int i = 0; i < GameDirector.Instance.AP.needNum; i++)
+            for (int i = followingEnemy.Count-GameDirector.Instance.AP.needNum; i < followingEnemy.Count; i++)
             {
                 followingEnemy[i].JumpToEndPoint(GameDirector.Instance.AP.walkPoint[2].position);
                 
@@ -315,22 +380,54 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private bool CheckIsEnemyWalkingActionFinish()
+    {
+        int finishedNum = 0;
+        for (int i = 0; i < followingEnemy.Count-GameDirector.Instance.AP.needNum; i++)
+        {
+            if (GameDirector.Instance.AP.IsPileUp && followingEnemy[i].IsWaiting)
+            {
+                finishedNum++;
+            }
+
+            if (GameDirector.Instance.AP.IsBuildBridge && followingEnemy[i].CrossFinish)
+            {
+                finishedNum++;
+            }
+        }
+
+        if (finishedNum == followingEnemy.Count - GameDirector.Instance.AP.needNum)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     private void ResetAfterActionFinish()
     {
         foreach(Enemy obj in followingEnemy)
         {
+            obj.IsFollow = false;
             obj.IsAction = false;
+            obj.IsWalkingAction = false;
             obj.PileUpFinish = false;
             obj.BuildFinish = false;
-            obj.IsFollow = false;
-            obj.transform.rotation = Quaternion.identity;
+            obj.IsClimbUp = false;
+            obj.IsWaiting = false;
+            obj.IsCrossBridge = false;
+            obj.CrossFinish = false;
+            obj.transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
         }
         IsActionConfirm = false;
         IsEnemyMoving = false;
+        IsWalkingAction = false;
         IsWaiting = false;
         CrossFinish = false;
         rb.useGravity = true;
-        transform.rotation = Quaternion.identity;
+        transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
 
         if (GameDirector.Instance.AP.NeedBlock)
         {

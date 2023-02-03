@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 288792407}
   - component: {fileID: 288792406}
   m_Layer: 0
-  m_Name: BGMPlayer
+  m_Name: GameDirector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BGMNum: 2
+  AP: {fileID: 0}
 --- !u!4 &288792407
 Transform:
   m_ObjectHideFlags: 0
@@ -373,6 +374,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6823656383972830800, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
   m_PrefabInstance: {fileID: 757738740}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &900522970 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2373836605543508411, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+  m_PrefabInstance: {fileID: 757738740}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1024903857
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -380,6 +386,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1921145761}
     m_Modifications:
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 900522970}
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
@@ -466,6 +476,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5143e6b28c32aee4b9fc77953fa32648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1051211499
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1051211501}
+  - component: {fileID: 1051211500}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1051211500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051211499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd900791a11ebc48a1e5835655e3e0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1051211501
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051211499}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.45629883, y: 0.42565918, z: 5.0640955}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1083703608
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -473,6 +527,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1921145761}
     m_Modifications:
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 900522970}
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
@@ -665,6 +723,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1921145761}
     m_Modifications:
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 900522970}
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
       objectReference: {fileID: 757738746}
@@ -750,6 +812,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5143e6b28c32aee4b9fc77953fa32648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1689259377 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3644013339947358282, guid: 97c59a56965687a49bf53e53c44fc399, type: 3}
+  m_PrefabInstance: {fileID: 757738740}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 757738741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f47b163472c6944190c510f94eaf179, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1921145760
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,6 +865,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1921145761}
     m_Modifications:
+    - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 900522970}
     - target: {fileID: 778092093597467661, guid: 20aff86675d949b40ae11682b2981d51, type: 3}
       propertyPath: followPosArray.Array.data[0]
       value: 
@@ -885,6 +962,46 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3119549605225190909, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 4516984618319009732, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnTarget
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 6819582293881645957, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnTarget
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 8368276068201995785, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnTarget
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 8861926642441056083, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 8861926642441056083, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnCountDownTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8861926642685614250, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 8861926642685614250, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnCountDownTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8861926642758344016, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: playerObj
+      value: 
+      objectReference: {fileID: 1689259377}
+    - target: {fileID: 8861926642758344016, guid: 73777941a51a750499759e7a96ffe904, type: 3}
+      propertyPath: respawnCountDownTime
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8861926643821957257, guid: 73777941a51a750499759e7a96ffe904, type: 3}
       propertyPath: m_Name
       value: Stage2

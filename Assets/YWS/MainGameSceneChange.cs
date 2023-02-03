@@ -5,9 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class MainGameSceneChange : MonoBehaviour
 {
+    [SerializeField] private PlayerController player = null;
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player" && other.gameObject.GetComponent<PlayerController>().followingEnemy.Count == 0)
+        if (other.CompareTag("Player") && player.followingEnemy.Count == 0)
         {
             SoundManager.Instance.PlaySE(1);
             GameClear();

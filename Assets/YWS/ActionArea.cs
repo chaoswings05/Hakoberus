@@ -9,6 +9,7 @@ public class ActionArea : MonoBehaviour
     [Header("行うアクション")]
     public bool IsPileUp = false;
     public bool IsBuildBridge = false;
+    [Header("アクションを行う時の正面は")] public float forward = 0f;
     [Header("必要赤ハコベロス数")] public int needNum = 2;
     public bool NeedBlock = false;
     [SerializeField] private GameObject blockingWall = null;
