@@ -4,45 +4,47 @@ using UnityEngine;
 
 public class FloorFall : MonoBehaviour
 {
-   
+    [SerializeField, Header("ï¿½ï¿½ï¿½ï¿½Ôƒnï¿½Rï¿½xï¿½ï¿½ï¿½Xï¿½Ìï¿½ï¿½")] int fallcount = 0;
+    [SerializeField] private PlayerController playerObj = null;
+    [SerializeField, Header("ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ì•ï¿½ï¿½ï¿½ï¿½nï¿½_")] private Transform respawnPoint = null;
+    [SerializeField] private Rigidbody rb = null;
+    private Vector3 thisPos = Vector3.zero;
+    [SerializeField, Header("ï¿½ï¿½ï¿½Ì•ï¿½ï¿½ó°‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚Å‚Ìï¿½ï¿½ï¿½")] private float respawnCountDownTime = 0f;
+    private float elapsedTime = 0f;
+    private bool IsRespawnCountDownStart = false;
 
-    [SerializeField]
-    int count;
-
-    //æ‚ê‚éƒnƒRƒxƒƒX‚Ì”‚ğİ’è‚µ‚Ä‚­‚¾‚³‚¢
-    [SerializeField]
-    int fallcount;
-
+    void Start()
+    {
+        thisPos = this.transform.position;   
+    }
 
     void Update()
     {
-        
-        if(fallcount==count)
-        {
-           
-            GetComponent<Rigidbody>().isKinematic = false;
+        if (IsRespawnCountDownStart)
+        {      
+            elapsedTime += Time.deltaTime;
+
+            if (elapsedTime >= respawnCountDownTime)
+            {
+                transform.position = thisPos;
+                rb.isKinematic = true;
+                playerObj.transform.position = respawnPoint.position;
+                for (int i = 0; i < playerObj.followingEnemy.Count; i++)
+                {
+                    playerObj.followingEnemy[i].transform.position = respawnPoint.position;
+                }
+                elapsedTime = 0f;
+                IsRespawnCountDownStart = false;
+            }
         }
     }
 
-
-    void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        //Player‚©Subƒ^ƒO‚É‚ ‚Á‚½‚çƒJƒEƒ“ƒg‚ğ‘‚â‚·
-        //Subƒ^ƒO‚ÍÔƒnƒRƒxƒƒX‚Ì‚±‚Æ
-        if (other.tag == "Player" || other.tag == "Sub")
+        if (other.gameObject.CompareTag("Player") && playerObj.followingEnemy.Count > fallcount)
         {
-            count++;
-
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        //Player‚©Subƒ^ƒO‚ª—£‚ê‚½‚çƒJƒEƒ“ƒg‚ğŒ¸‚ç‚·
-        if (other.tag == "Player" || other.tag == "Sub")
-        {
-            count--;
-           
+            rb.isKinematic = false;
+            IsRespawnCountDownStart = true;
         }
     }
 }

@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class ActionArea : MonoBehaviour
 {
-    [SerializeField, Header("アクションを行う場所")] public Transform targetPoint = null;
-    [SerializeField, Header("アクションが終了する場所")] public Transform endPoint = null;
+    [Header("アクションを行う場所")] public List<Transform> actionPoint = new List<Transform>();
+    [Header("歩いて通る場所")] public List<Transform> walkPoint = new List<Transform>();
     [Header("行うアクション")]
     public bool IsPileUp = false;
     public bool IsBuildBridge = false;
-    [SerializeField, Header("必要赤ハコベロス数")] public int needNum = 2;
-    [SerializeField] private bool NeedBlock = false;
+    [Header("アクションを行う時の正面は")] public float forward = 0f;
+    [Header("必要赤ハコベロス数")] public int needNum = 2;
+    public bool NeedBlock = false;
     [SerializeField] private GameObject blockingWall = null;
-    [SerializeField] private float WaitTime = 0.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -23,24 +23,8 @@ public class ActionArea : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void blockingActivate()
     {
-        
-    }
-
-    public void ActionFinish()
-    {
-        if (NeedBlock)
-        {
-            StartCoroutine(blockingActivate());
-        }
-    }
-
-    private IEnumerator blockingActivate()
-    {
-        yield return new WaitForSeconds(WaitTime);
-
         blockingWall.SetActive(true);
     }
 }
