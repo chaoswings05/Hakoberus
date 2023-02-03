@@ -7,15 +7,18 @@ public class MainGameSceneChange : MonoBehaviour
 {
     [SerializeField] private PlayerController player = null;
 
-    [SerializeField]
+    [SerializeField, Header("パーティクル")]
     GameObject cracker;
+
+    [SerializeField, Header("発生場所")]
+    GameObject particleArea;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") && player.followingEnemy.Count == 0)
         {
-            SoundManager.Instance.PlaySE(1);
-            GameClear();
+           SoundManager.Instance.PlaySE(1);
+           GameClear();
         }     
     }
 
@@ -27,7 +30,7 @@ public class MainGameSceneChange : MonoBehaviour
 
     IEnumerator ParticlStart()
     {
-        Instantiate(cracker, transform.position, Quaternion.identity);
+        Instantiate(cracker, particleArea.transform.position, Quaternion.identity);
 
         Debug.Log("再生");
 
