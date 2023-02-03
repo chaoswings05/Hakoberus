@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4903744, g: 0.61261696, b: 0.5995292, a: 1}
+  m_IndirectSpecularColor: {r: 0.49019974, g: 0.61274236, b: 0.5989234, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1653,7 +1653,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2043789334
 Transform:
   m_ObjectHideFlags: 0
@@ -1682,6 +1682,91 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BGMNum: 1
+--- !u!1001 &2082404157
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4206946505894795027, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506010307706, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506258734341, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506275037496, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -26.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 8.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331076, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331077, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331077, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437331083, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: m_Name
+      value: cracker_effect_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206946506437483156, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b724820da0168174e90a28e4d076e8f4, type: 3}
 --- !u!1 &2128191626
 GameObject:
   m_ObjectHideFlags: 0
