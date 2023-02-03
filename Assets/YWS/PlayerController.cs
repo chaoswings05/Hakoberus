@@ -22,8 +22,8 @@ public class PlayerController : MonoBehaviour
     private bool CanAction = false; //アクションを行える状態なのか
     private bool IsActionConfirm = false; //アクションを実行するかどうか
     private bool IsEnemyMoving = false; //赤ハコベロスがアクションを開始したかどうか
-    private bool IsWalkingAction = false;
-    [SerializeField]private bool IsEnemyLeft = false;
+    private bool IsWalkingAction = false; //歩きアクション中かどうか
+    private bool IsEnemyLeft = false; //赤ハコベロスが余っているかどうか
     //階段登りアクション
     private bool IsClimbing = false; //階段を登り始めたかどうか
     private bool ClimbFinish = false; //階段を登り切ったかどうか
@@ -124,10 +124,11 @@ public class PlayerController : MonoBehaviour
         {
             speed = defaultSpeed;
         }
-
-        //Debug.Log(speed);
     }
 
+    /// <summary>
+    /// 赤ハコベロスに番号を振り分ける
+    /// </summary>
     private void SetEnemyNum()
     {
         int actionNum = 0;
@@ -146,7 +147,7 @@ public class PlayerController : MonoBehaviour
         //PlayerがActionPointに入ったら
         if(other.CompareTag("ActionPoint"))
         {
-            //Debug.Log("範囲内に入りました");
+            //触れたActionPointを登録しておく
             GameDirector.Instance.AP = other.gameObject.GetComponent<ActionArea>();
 
             //アクションに必要な分の赤ハコベロスを連れている時だけアクションを行う許可を出す
@@ -159,7 +160,6 @@ public class PlayerController : MonoBehaviour
         //Playerが骨と接触した場合
         if (other.CompareTag("Bone"))
         {
-            //Debug.Log("骨を拾いました");
             SoundManager.Instance.PlaySE(0);
             //処理が重複しないように骨のタグを変更
             other.tag = "Untagged";
@@ -176,9 +176,6 @@ public class PlayerController : MonoBehaviour
         //Playerが赤ハコベロスを連れていない状態でゴールに到達した場合
         if (other.CompareTag("Goal") && followingEnemy.Count == 0)
         {
-            //Goalしたログを出す
-            //Debug.Log("Goal");
-           
             //Playerを非表示にする
             this.gameObject.SetActive(false);
         }
@@ -189,22 +186,30 @@ public class PlayerController : MonoBehaviour
         //ActionPointから離れた場合
         if (other.CompareTag("ActionPoint"))
         {
-            //Debug.Log("範囲内から離れました");
             CanAction = false;
         }
     }
 
+    /// <summary>
+    /// 赤ハコベロスをアクション所定位置に配置する処理
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator EnemyMoveToTargetArea()
     {
         var cachedWait = new WaitForSeconds(1f);
-        int standbyNum = 0;
+        int standbyNum = 0; //何番目の赤ハコベロスか
+
+        //後ろから順で数える
         for (int i = followingEnemy.Count-1; i > followingEnemy.Count-GameDirector.Instance.AP.needNum-1; i--)
         {
+            //赤ハコベロスのプレイヤー追従を切る
             followingEnemy[i].IsFollow = false;
             followingEnemy[i].IsAction = true;
+            //赤ハコベロスに所定位置を与える
             if (GameDirector.Instance.AP.IsPileUp)
             {
                 followingEnemy[i].actionTargetPos = GameDirector.Instance.AP.actionPoint[0];
+                //階段積み上げアクションの場合、二体目移行はジャンプの必要がある
                 if (GameDirector.Instance.AP.needNum > 1 && standbyNum >= 1)
                 {
                     followingEnemy[i].NeedJump = true;
@@ -220,10 +225,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 赤ハコベロスが余った時、余ったハコベロスをプレイヤーと同じ動きをさせる
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator LeftEnemyFollowPlayer()
     {
         var cachedWait = new WaitForSeconds(0.1f);
 
+        //前から順で数える
         for (int i = 0; i < followingEnemy.Count-GameDirector.Instance.AP.needNum; i++)
         {
             followingEnemy[i].IsFollow = false;
@@ -428,10 +438,5 @@ public class PlayerController : MonoBehaviour
         CrossFinish = false;
         rb.useGravity = true;
         transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
-
-        if (GameDirector.Instance.AP.NeedBlock)
-        {
-            GameDirector.Instance.AP.blockingActivate();
-        }
     }
 }

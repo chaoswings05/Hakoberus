@@ -11,20 +11,4 @@ public class ActionArea : MonoBehaviour
     public bool IsBuildBridge = false;
     [Header("アクションを行う時の正面は")] public float forward = 0f;
     [Header("必要赤ハコベロス数")] public int needNum = 2;
-    public bool NeedBlock = false;
-    [SerializeField] private GameObject blockingWall = null;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (blockingWall != null)
-        {
-            blockingWall.SetActive(false);
-        }
-    }
-
-    public void blockingActivate()
-    {
-        blockingWall.SetActive(true);
-    }
 }
