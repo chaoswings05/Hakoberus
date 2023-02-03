@@ -46,44 +46,51 @@ public class PlayerController : MonoBehaviour
         {
             if (CanAction && !IsActionConfirm)
             {
+                //プレイヤーの入力を切る
                 IsActionConfirm = true;
                 playerAnimator.SetBool(isWalkingID, false);
             }
         }
 
+        //アクションが開始した場合、アクション担当の赤ハコベロスを派遣させる
         if (IsActionConfirm && !IsEnemyMoving)
         {
             StartCoroutine(EnemyMoveToTargetArea());
             IsEnemyMoving = true;
         }
 
+        //アクション担当の赤ハコベロスがアクションを終了し、余った赤ハコベロスが存在する場合、先に余った赤ハコベロスがついて来る準備をする
         if (IsActionConfirm && CheckIsEnemyActionFinish())
         {
             if (!IsWalkingAction && followingEnemy.Count > GameDirector.Instance.AP.needNum)
             {
                 StartCoroutine(LeftEnemyFollowPlayer());
                 IsWalkingAction = true;
+                //ここでプレイヤーの移動を一旦遅らせる
                 return;
             }
 
+            //階段登り
             if (GameDirector.Instance.AP.IsPileUp)
             {
                 ClimbUp();
             }
+            //橋渡り
             if (GameDirector.Instance.AP.IsBuildBridge)
             {
                 CrossBridge();
             }
         }
 
+        //赤ハコベロスが余って、それらがすべてアクション終了位置に着いたら、アクション担当の赤ハコベロスを帰還させる
         if (IsEnemyLeft && CheckIsEnemyWalkingActionFinish())
         {
             StartCoroutine(EnemyJumpToEndPoint());
             IsEnemyLeft = false;
         }
 
-        float x = Input.GetAxisRaw("Horizontal");
-        float z = Input.GetAxisRaw("Vertical");
+        float x = Input.GetAxisRaw("Horizontal") * speed;
+        float z = Input.GetAxisRaw("Vertical") * speed;
 
         //Playerの移動
         if (!IsActionConfirm)
@@ -102,10 +109,13 @@ public class PlayerController : MonoBehaviour
 
             //移動した方向にPlayerの向きを変更する
             transform.LookAt(direction);
-            rb.velocity = (new Vector3(x,0,z) * speed);
+            rb.velocity = new Vector3(x, rb.velocity.y, z);
         }
     }
 
+    /// <summary>
+    /// 連れている赤ハコベロスの数によって移動速度が変わるやつ
+    /// </summary>
     private void SetSpeed()
     {
         if (followingEnemy.Count == 2 || followingEnemy.Count == 3)
@@ -209,7 +219,7 @@ public class PlayerController : MonoBehaviour
             if (GameDirector.Instance.AP.IsPileUp)
             {
                 followingEnemy[i].actionTargetPos = GameDirector.Instance.AP.actionPoint[0];
-                //階段積み上げアクションの場合、二体目移行はジャンプの必要がある
+                //階段積み上げアクションの場合、二体目以降はジャンプの必要がある
                 if (GameDirector.Instance.AP.needNum > 1 && standbyNum >= 1)
                 {
                     followingEnemy[i].NeedJump = true;
@@ -236,6 +246,7 @@ public class PlayerController : MonoBehaviour
         //前から順で数える
         for (int i = 0; i < followingEnemy.Count-GameDirector.Instance.AP.needNum; i++)
         {
+            //必要なフラグを立たせる
             followingEnemy[i].IsFollow = false;
             followingEnemy[i].IsWalkingAction = true;
             if (GameDirector.Instance.AP.IsPileUp)
@@ -251,9 +262,14 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 階段登りアクション
+    /// </summary>
     private void ClimbUp()
     {
+        //一旦重力を外す
         rb.useGravity = false;
+        //ポイントを順番に辿っていき、一定距離内になったら次のポイントを目標に変更する
         if (!IsClimbing && !ClimbFinish && !IsWaiting)
         {
             playerAnimator.SetBool(isWalkingID, true);
@@ -264,6 +280,7 @@ public class PlayerController : MonoBehaviour
             {
                 IsClimbing = true;
                 transform.position = GameDirector.Instance.AP.walkPoint[0].position;
+                //ここから登り始めるので、上に向かせる
                 transform.rotation = Quaternion.Euler(-90,GameDirector.Instance.AP.forward,0);
                 playerAnimator.SetBool(isWalkingID, false);
             }
@@ -278,6 +295,7 @@ public class PlayerController : MonoBehaviour
                 IsClimbing = false;
                 ClimbFinish = true;
                 transform.position = GameDirector.Instance.AP.walkPoint[1].position;
+                //ここで登りきるので、元の向きに戻す
                 transform.rotation = Quaternion.Euler(0,GameDirector.Instance.AP.forward,0);
                 playerAnimator.SetBool(isWalkingID, false);
             }
@@ -289,12 +307,15 @@ public class PlayerController : MonoBehaviour
 
             if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[2].position) <= 0.01f)
             {
+                //ここでプレイヤー側のアクションが終了する
                 if (followingEnemy.Count > GameDirector.Instance.AP.needNum)
                 {
+                    //余った赤ハコベロスが存在する場合、それらがアクションを終了するまで待つ
                     IsEnemyLeft = true;
                 }
                 else
                 {
+                    //余った赤ハコベロスがいない場合、階段担当の赤ハコベロスをジャンプで帰還させる
                     StartCoroutine(EnemyJumpToEndPoint());
                 }
                 ClimbFinish = false;
@@ -305,9 +326,14 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 橋を渡るアクション
+    /// </summary>
     private void CrossBridge()
     {
+        //一旦重力を外す
         rb.useGravity = false;
+        //ポイントを順番に辿っていき、一定距離内になったら次のポイントを目標に変更する
         if (!CrossFinish)
         {
             transform.LookAt(GameDirector.Instance.AP.walkPoint[crossNum]);
@@ -315,15 +341,18 @@ public class PlayerController : MonoBehaviour
 
             if (Vector3.SqrMagnitude(transform.position - GameDirector.Instance.AP.walkPoint[crossNum].position) <= 0.01f)
             {
+                //ここでプレイヤー側のアクションが終了する
                 transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
                 if (crossNum == GameDirector.Instance.AP.needNum)
                 {
                     if (followingEnemy.Count > GameDirector.Instance.AP.needNum)
                     {
+                        //余った赤ハコベロスが存在する場合、それらがアクションを終了するまで待つ
                         IsEnemyLeft = true;
                     }
                     else
                     {
+                        //余った赤ハコベロスがいない場合、階段担当の赤ハコベロスをジャンプで帰還させる
                         StartCoroutine(EnemyJumpToEndPoint());
                     }
                     transform.position = GameDirector.Instance.AP.walkPoint[crossNum].position;
@@ -339,10 +368,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アクションを担当した赤ハコベロスがジャンプして帰還する処理
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator EnemyJumpToEndPoint()
     {
         var cachedWait = new WaitForSeconds(1f);
 
+        //階段掛けアクションの場合、一番上の段の赤ハコベロスから戻ってくる
         if (GameDirector.Instance.AP.IsPileUp)
         {
             for (int i = followingEnemy.Count-GameDirector.Instance.AP.needNum; i < followingEnemy.Count; i++)
@@ -352,6 +386,7 @@ public class PlayerController : MonoBehaviour
                 yield return cachedWait;
             }
         }
+        //橋掛けアクションの場合、一番最初に橋になった赤ハコベロスから戻ってくる
         else if (GameDirector.Instance.AP.IsBuildBridge)
         {
             for (int i = followingEnemy.Count-1; i > followingEnemy.Count-GameDirector.Instance.AP.needNum-1; i--)
@@ -361,9 +396,14 @@ public class PlayerController : MonoBehaviour
                 yield return cachedWait;
             }
         }
+        //赤ハコベロスが全員戻ってきたら、アクション用のフラグ類をリセットする
         ResetAfterActionFinish();
     }
 
+    /// <summary>
+    /// アクションを行う赤ハコベロスがすべてアクションを終了したかどうか調べる関数
+    /// </summary>
+    /// <returns></returns>
     private bool CheckIsEnemyActionFinish()
     {
         int finishedNum = 0;
@@ -390,6 +430,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アクションに参加しない余った赤ハコベロスがすべて、アクション終了地点までたどり着いたかどうか調べる関数
+    /// </summary>
+    /// <returns></returns>
     private bool CheckIsEnemyWalkingActionFinish()
     {
         int finishedNum = 0;
@@ -416,6 +460,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アクション後に色々リセットする関数
+    /// </summary>
     private void ResetAfterActionFinish()
     {
         foreach(Enemy obj in followingEnemy)

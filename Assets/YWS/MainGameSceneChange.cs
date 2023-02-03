@@ -7,8 +7,8 @@ public class MainGameSceneChange : MonoBehaviour
 {
     [SerializeField] private PlayerController player = null;
 
-    [SerializeField]
-    GameObject cracker;
+    /*[SerializeField]
+    GameObject cracker;*/
 
     private void OnTriggerEnter(Collider other)
     {
@@ -21,15 +21,16 @@ public class MainGameSceneChange : MonoBehaviour
 
     private void GameClear()
     {
-        StartCoroutine(ParticlStart());
+        //StartCoroutine(ParticlStart());
         SoundManager.Instance.StopBGM();
+        SceneManager.LoadScene("GameClear");
     }
 
     IEnumerator ParticlStart()
     {
-        Instantiate(cracker, transform.position, Quaternion.identity);
+        //Instantiate(cracker, transform.position, Quaternion.identity);
 
-        Debug.Log("çƒê∂");
+        Debug.Log("ÔøΩƒêÔøΩ");
 
         yield return new WaitForSeconds(5f);
 

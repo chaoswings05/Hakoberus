@@ -100,11 +100,13 @@ public class Enemy : MonoBehaviour
             BuildBridge();
             return;
         }
+        //階段を登るアクション
         if (IsWalkingAction && IsClimbUp)
         {
             ClimbUp();
             return;
         }
+        //橋を渡るアクション
         if (IsWalkingAction && IsCrossBridge)
         {
             CrossBridge();
@@ -112,24 +114,35 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 隊列内の自分が着くべきポイントを設定する
+    /// </summary>
     public void SetFollowPoint()
     {
         followPos = followPosArray[followNum];
     }
 
+    /// <summary>
+    /// 骨を持ってフィールドを離れる処理
+    /// </summary>
     private void BoneDestroy()
     {
         enemyAnimator.SetBool(isWalkingID, true);
-        transform.LookAt(BoneDestroyPos.transform.position); //骨を消す場所に行く
+        //離脱ポイントに向かう
+        transform.LookAt(BoneDestroyPos.transform.position);
         transform.position += transform.forward * speed;
 
-        if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 1f) //もしBoneDestroyPosの距離が1より小さくなったら
+        //離脱ポイントと一定距離になったら、自身と所持している骨を削除する
+        if (Vector3.Distance(transform.position, BoneDestroyPos.transform.position) <= 1f)
         {
-            Destroy(bone.gameObject); //骨を消す
-            Destroy(gameObject); //自分を消す
+            Destroy(bone.gameObject);
+            Destroy(gameObject);
         }
     }
 
+    /// <summary>
+    /// 階段になる処理
+    /// </summary>
     private void PileUp()
     {
         if (!PileUpFinish && !IsJumping)
@@ -158,6 +171,9 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 階段積みの際にジャンプをした場合、リセットする関数
+    /// </summary>
     private void JumpFinish()
     {
         NeedJump = false;
@@ -167,6 +183,9 @@ public class Enemy : MonoBehaviour
         PileUpFinish = true;
     }
 
+    /// <summary>
+    /// 橋になる処理
+    /// </summary>
     private void BuildBridge()
     {
         if (!BuildFinish)
@@ -185,11 +204,18 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アクション終了後に、ジャンプして帰還する関数
+    /// </summary>
+    /// <param name="actionEndPos">目標ポイント</param>
     public void JumpToEndPoint(Vector3 actionEndPos)
     {
         transform.DOJump(actionEndPos, 0.5f, 1, 0.5f);
     }
 
+    /// <summary>
+    /// 階段を登るアクション
+    /// </summary>
     private void ClimbUp()
     {
         if (!IsClimbing && !ClimbFinish && !IsWaiting)
@@ -235,6 +261,9 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 橋を渡るアクション
+    /// </summary>
     private void CrossBridge()
     {
         if (!CrossFinish)
