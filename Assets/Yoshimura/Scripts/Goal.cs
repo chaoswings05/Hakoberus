@@ -25,7 +25,7 @@ public class Goal : MonoBehaviour
             {
                 if (Push == false)  
                 {
-                Debug.Log("‰Ÿ‚³‚ê‚½");
+               // Debug.Log("‰Ÿ‚³‚ê‚½");
                 counter++;
                 Push = true;   
                 }
