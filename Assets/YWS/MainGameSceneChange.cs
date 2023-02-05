@@ -6,9 +6,7 @@ using UnityEngine.SceneManagement;
 public class MainGameSceneChange : MonoBehaviour
 {
     [SerializeField] private PlayerController player = null;
-
-    /*[SerializeField]
-    GameObject cracker;*/
+    [SerializeField, Header("クリア演出エフェクト")] GameObject cracker;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -21,20 +19,20 @@ public class MainGameSceneChange : MonoBehaviour
 
     private void GameClear()
     {
-        //StartCoroutine(ParticlStart());
+        StartCoroutine(ParticlStart());
         SoundManager.Instance.StopBGM();
-        SceneManager.LoadScene("GameClear");
+        //SceneManager.LoadScene("GameClear");
     }
 
     IEnumerator ParticlStart()
     {
         //Instantiate(cracker, transform.position, Quaternion.identity);
 
-        Debug.Log("�Đ�");
+        Debug.Log("再生");
 
         yield return new WaitForSeconds(5f);
 
-        SceneManager.LoadScene("GameClear");
+        //SceneManager.LoadScene("GameClear");
 
     }
 }

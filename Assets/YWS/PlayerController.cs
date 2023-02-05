@@ -41,6 +41,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        //チュートリアルウインドウ表示中はプレイヤーの処理は何も行わない
+        if (!GameDirector.Instance.IsGameStart)
+        {
+            return;
+        }
+
         //CanAction状態でアクションボタンを押した場合
         if (Input.GetButtonDown("DS4x") || Input.GetKeyDown(KeyCode.Space))
         {
