@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class MainGameSceneChange : MonoBehaviour
 {
     [SerializeField] private PlayerController player = null;
-    [SerializeField, Header("クリア演出エフェクト")] GameObject cracker;
+    [SerializeField, Header("クリア演出エフェクト")] private GameObject cracker = null;
+    [SerializeField, Header("エフェクト発生ポイント")] private Transform crackerPoint = null;
+    [SerializeField] private ClearWindow clearWindow = null;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -19,20 +20,7 @@ public class MainGameSceneChange : MonoBehaviour
 
     private void GameClear()
     {
-        StartCoroutine(ParticlStart());
-        SoundManager.Instance.StopBGM();
-        //SceneManager.LoadScene("GameClear");
-    }
-
-    IEnumerator ParticlStart()
-    {
-        //Instantiate(cracker, transform.position, Quaternion.identity);
-
-        Debug.Log("再生");
-
-        yield return new WaitForSeconds(5f);
-
-        //SceneManager.LoadScene("GameClear");
-
+        Instantiate(cracker, crackerPoint);
+        clearWindow.WindowDeployment();
     }
 }

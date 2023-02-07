@@ -27,7 +27,8 @@ public class GameDirector : MonoBehaviour
 
     [SerializeField, Header("流すBGMの番号")] private int BGMNum = 0;
     public ActionArea AP = null;
-    [SerializeField, Header("ウインドウの背景画像")] private Image window = null;
+    [SerializeField, Header("ウインドウ本体")] private GameObject window = null;
+    [SerializeField, Header("ウインドウの背景画像")] private Image windowBG = null;
     [SerializeField, Header("ウインドウのテキスト")] private Text text = null;
     public bool IsGameStart = false;
     private bool IsFadeStart = false;
@@ -49,9 +50,15 @@ public class GameDirector : MonoBehaviour
             if (Input.GetButtonDown("DS4x") || Input.GetKeyDown(KeyCode.Space))
             {
                 text.DOFade(0f, fadeTime);
-                window.DOFade(0f, fadeTime).OnComplete(()=> IsGameStart = true);
+                windowBG.DOFade(0f, fadeTime).OnComplete(()=> DeleteWindow());
                 IsFadeStart = true;
             }
         }
+    }
+
+    private void DeleteWindow()
+    {
+        Destroy(window);
+        IsGameStart = true;
     }
 }

@@ -14,7 +14,6 @@ public class MoveScene : MonoBehaviour
     {
         if (Input.GetButtonDown("DS4x") || Input.GetMouseButtonDown(0))
         {
-            SoundManager.Instance.StopBGM();
             OnClickStartButton();
         }
     }

@@ -8,15 +8,17 @@ public class Reset : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float z = Input.GetAxisRaw("Vertical");
+        float DS4UD = Input.GetAxisRaw("DS4UpDown");
 
         if (Input.GetKey(KeyCode.Q) && Input.GetKeyDown(KeyCode.P))
         {
+            SoundManager.Instance.StopBGM();
             SceneManager.LoadScene("TitleScene");
         }
 
-        if (z > 0 && Input.GetButtonDown("DS4△"))
+        if (DS4UD > 0 && Input.GetButtonDown("DS4△"))
         {
+            SoundManager.Instance.StopBGM();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

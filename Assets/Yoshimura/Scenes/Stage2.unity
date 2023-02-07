@@ -1659,6 +1659,7 @@ GameObject:
   m_Component:
   - component: {fileID: 462329554}
   - component: {fileID: 462329553}
+  - component: {fileID: 462329555}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1743,6 +1744,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &462329555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462329552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 1
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
 --- !u!1001 &471401144
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7754,8 +7775,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99983751f4b2e9a4eae0f82946b9300a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 0
   fallcount: 3
+  playerObj: {fileID: 0}
+  respawnPoint: {fileID: 0}
+  rb: {fileID: 0}
+  respawnCountDownTime: 0
 --- !u!54 &1652980410
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -8930,8 +8954,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99983751f4b2e9a4eae0f82946b9300a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 0
   fallcount: 1
+  playerObj: {fileID: 0}
+  respawnPoint: {fileID: 0}
+  rb: {fileID: 0}
+  respawnCountDownTime: 0
 --- !u!4 &1919202685 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3959888068658222339, guid: 33d70fc43e9b6264aaa1dd958075f237, type: 3}
@@ -9208,8 +9235,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99983751f4b2e9a4eae0f82946b9300a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 0
   fallcount: 1
+  playerObj: {fileID: 0}
+  respawnPoint: {fileID: 0}
+  rb: {fileID: 0}
+  respawnCountDownTime: 0
 --- !u!1001 &1964696243
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10360,6 +10390,10 @@ PrefabInstance:
       propertyPath: m_Text
       value: "\u30B9\u30C6\u30FC\u30B8\uFF12\r\n\u3053\u3053\u3067\u306F\u8DB3\u5834\u304C\u4E0D\u5B89\u5B9A\u306A\u5834\u6240\u304C\u3042\u308B\r\n\u8D64\u3044\u30CF\u30B3\u30D9\u30ED\u30B9\u304C\u591A\u3059\u304E\u308B\u3068\u5D29\u308C\u308B\u304B\u3082\uFF1F"
       objectReference: {fileID: 0}
+    - target: {fileID: 4700868183634073810, guid: 274d4ed4c1a1bca42af378488163910d, type: 3}
+      propertyPath: m_FontData.m_Font
+      value: 
+      objectReference: {fileID: 12800000, guid: fc0663c4ca982f14ebf43723e855f61a, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 274d4ed4c1a1bca42af378488163910d, type: 3}
 --- !u!1001 &2102922764

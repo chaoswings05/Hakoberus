@@ -6,19 +6,12 @@ using UnityEngine.UI;
 
 public class StageSelectButton : MonoBehaviour
 {
-    [SerializeField, Header("ステージイメージ")]
-    GameObject i_stage1;
+    [SerializeField, Header("ステージ1イメージ")] private GameObject i_stage1 = null;
+    [SerializeField, Header("ステージ2イメージ")] private GameObject i_stage2 = null;
+    [SerializeField, Header("ステージ1カーソル")] private GameObject i_cursor1 = null;
+    [SerializeField, Header("ステージ2カーソル")] private GameObject i_cursor2 = null;
+    [SerializeField, Header("ステージ1ボタン")] private Button _button = null;
 
-    [SerializeField]
-    GameObject i_stage2;
-
-    [SerializeField, Header("カーソルイメージ")]
-    GameObject i_cursor1;
-
-    [SerializeField]
-    GameObject i_cursor2;
-
-    Button _button;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,15 +20,8 @@ public class StageSelectButton : MonoBehaviour
         i_cursor1.SetActive(false);
         i_cursor2.SetActive(false);
 
-        _button = GameObject.Find("Stage1Button").GetComponent<Button>();
         // 最初からボタンを選択している状態
         _button.Select();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     // マウスカーソルをボタンの上に置いたら画像1表示
@@ -43,7 +29,6 @@ public class StageSelectButton : MonoBehaviour
     {
         i_stage1.SetActive(true);
         i_cursor1.SetActive(true);
-
     }
 
     // マウスカーソルをボタンの上に置いたら画像2表示
@@ -51,7 +36,6 @@ public class StageSelectButton : MonoBehaviour
     {
         i_stage2.SetActive(true);
         i_cursor2.SetActive(true);
-
     }
 
     // マウスカーソルをボタンから離したら画像1を非表示
@@ -71,15 +55,14 @@ public class StageSelectButton : MonoBehaviour
     // ステージ1へ
     public void OnClickStage1()
     {
-        Debug.Log("ステージ1へ");
+        SoundManager.Instance.StopBGM();
         SceneManager.LoadScene("Stage1");
     }
 
     // ステージ2へ
     public void OnClickStage2()
     {
-        Debug.Log("ステージ2へ");
+        SoundManager.Instance.StopBGM();
         SceneManager.LoadScene("Stage2");
     }
-
 }
